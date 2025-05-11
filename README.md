@@ -24,8 +24,8 @@ Report scams. View proof. Stay alert.
 5. Verification System
 
 ## Tech Stack
-- Frontend: Lynx.js
-- Backend: Cloudflare Workers
+- Frontend: flutter app (Dart)
+- Backend: Cloudflare Workers <HonoJs>
 - Database: Cloudflare D1 (SQL)
 - Authentication: Twilio Verify API
 - Storage: Cloudflare R2 (for proof attachments)
@@ -90,25 +90,25 @@ CREATE TABLE disputes (
 
 ## API Endpoints
 1. Authentication
-   - POST /auth/send-otp
-   - POST /auth/verify-otp
+    - POST /auth/send-otp
+    - POST /auth/verify-otp
 
 2. User Management
-   - GET /users/profile
-   - PUT /users/profile
-   - GET /users/reports-against-me
+    - GET /users/profile
+    - PUT /users/profile
+    - GET /users/reports-against-me
 
 3. Business Management
-   - POST /businesses
-   - GET /businesses/search
-   - GET /businesses/:id
+    - POST /businesses
+    - GET /businesses/search
+    - GET /businesses/:id
 
 4. Report Management
-   - POST /reports
-   - GET /reports
-   - GET /reports/:id
-   - POST /reports/:id/verify
-   - POST /reports/:id/dispute
+    - POST /reports
+    - GET /reports
+    - GET /reports/:id
+    - POST /reports/:id/verify
+    - POST /reports/:id/dispute
 
 5. File Management
-   - POST /upload-proof
+    - POST /upload-proof
