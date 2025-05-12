@@ -4,8 +4,6 @@ import 'constants.dart';
 import 'widgets.dart';
 import 'signup_screen.dart';
 import 'home_screen.dart';
-import 'home_screen.dart';
-import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -20,6 +18,21 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   bool _otpSent = false;
   final _otpController = TextEditingController();
+  String? _otpError;
+
+  @override
+  void initState() {
+    super.initState();
+    _otpController.addListener(_clearOtpError);
+  }
+
+  void _clearOtpError() {
+    if (_otpError != null) {
+      setState(() {
+        _otpError = null;
+      });
+    }
+  }
 
   void _handleSendOtp() {
     if (_formKey.currentState?.validate() ?? false) {
@@ -29,6 +42,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       // Simulate OTP sending
       Future.delayed(AppDurations.medium, () {
+        if (!mounted) return;
         setState(() {
           _isLoading = false;
           _otpSent = true;
@@ -48,8 +62,10 @@ class _LoginScreenState extends State<LoginScreen> {
     if (_otpController.text.length == 6) {
       setState(() {
         _isLoading = true;
+        _otpError = null;
       }); // Simulate verification
       Future.delayed(AppDurations.medium, () {
+        if (!mounted) return;
         setState(() {
           _isLoading = false;
         });
@@ -68,12 +84,9 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       });
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter a valid OTP'),
-          backgroundColor: AppColors.googleRed,
-        ),
-      );
+      setState(() {
+        _otpError = 'Please enter a valid 6-digit OTP';
+      });
     }
   }
 
@@ -85,6 +98,15 @@ class _LoginScreenState extends State<LoginScreen> {
       return 'Please enter a valid 10-digit mobile number';
     }
     return null;
+  }
+
+  // Helper method to handle login button state
+  VoidCallback getLoginButtonCallback() {
+    return () {
+      if (_otpController.text.length == 6) {
+        _handleLogin();
+      }
+    };
   }
 
   @override
@@ -102,7 +124,7 @@ class _LoginScreenState extends State<LoginScreen> {
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 40),
 
@@ -110,7 +132,7 @@ class _LoginScreenState extends State<LoginScreen> {
               FadeInDown(
                 duration: AppDurations.medium,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const Text('Welcome back!', style: AppTextStyles.headline),
                     const SizedBox(height: 8),
@@ -175,6 +197,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                   fontSize: 24,
                                   letterSpacing: 10,
                                 ),
+                                onChanged: (text) {
+                                  setState(() {});
+                                },
                                 decoration: InputDecoration(
                                   hintText: '------',
                                   counterText: '',
@@ -198,7 +223,22 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 8),
+                            if (_otpError != null)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 40,
+                                ),
+                                child: Text(
+                                  _otpError!,
+                                  style: const TextStyle(
+                                    color: AppColors.googleRed,
+                                    fontSize: 12,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            const SizedBox(height: 8),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -226,7 +266,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             const SizedBox(height: 24),
                             CustomPrimaryButton(
                               text: 'Login',
-                              onPressed: _handleLogin,
+                              onPressed: getLoginButtonCallback(),
                               isLoading: _isLoading,
                             ),
                           ],
@@ -239,40 +279,41 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 40),
 
-              // Sign up option
-              FadeInUp(
-                duration: AppDurations.slow,
-                child: Center(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        "Don't have an account? ",
-                        style: AppTextStyles.caption,
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          // Navigate to sign up screen
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const SignupScreen(),
+              // Sign up option - only show when not in OTP mode
+              if (!_otpSent)
+                FadeInUp(
+                  duration: AppDurations.slow,
+                  child: Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          "Don't have an account? ",
+                          style: AppTextStyles.caption,
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            // Navigate to sign up screen
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const SignupScreen(),
+                              ),
+                            );
+                          },
+                          child: const Text(
+                            "Sign Up",
+                            style: TextStyle(
+                              color: AppColors.googleBlue,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
                             ),
-                          );
-                        },
-                        child: const Text(
-                          "Sign Up",
-                          style: TextStyle(
-                            color: AppColors.googleBlue,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
         ),

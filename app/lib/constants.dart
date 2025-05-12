@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'color_utils.dart';
 
 // Google Colors Palette
 class AppColors {
@@ -16,6 +17,17 @@ class AppColors {
   // Background and shadow colors
   static const Color background = Color(0xFFF8F9FA);
   static const Color shadow = Color(0x1A000000);
+
+  // Use constants from ColorUtils instead of defining here
+  static const int kAlpha5Percent = ColorUtils.alpha5Percent;
+  static const int kAlpha10Percent = ColorUtils.alpha10Percent;
+  static const int kAlpha30Percent = ColorUtils.alpha30Percent;
+  static const int kAlpha50Percent = ColorUtils.alpha50Percent;
+
+  // Keep the helper method for backward compatibility
+  static Color withAlphaFromOpacity(Color color, double opacity) {
+    return ColorUtils.withAlphaFromOpacity(color, opacity);
+  }
 }
 
 // Text Styles

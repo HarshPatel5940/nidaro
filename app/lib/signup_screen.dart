@@ -63,6 +63,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
       // Simulate OTP sending
       Future.delayed(AppDurations.medium, () {
+        if (!mounted) return;
         setState(() {
           _isLoading = false;
           _otpSent = true;
@@ -86,6 +87,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
       // Simulate verification
       Future.delayed(AppDurations.medium, () {
+        if (!mounted) return;
         setState(() {
           _isLoading = false;
           _otpVerified = true;
@@ -127,6 +129,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
         // Simulate PAN verification
         Future.delayed(AppDurations.medium, () {
+          if (!mounted) return;
           setState(() {
             _isLoading = false;
           });
@@ -141,6 +144,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
         // Simulate final submission
         Future.delayed(AppDurations.medium, () {
+          if (!mounted) return;
           setState(() {
             _isLoading = false;
           });
@@ -331,13 +335,14 @@ class _SignupScreenState extends State<SignupScreen> {
     return Form(
       key: _formKeys[0],
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           FadeInDown(
             duration: AppDurations.fast,
             child: const Text(
               'Let\'s get started with your business details',
               style: AppTextStyles.body,
+              textAlign: TextAlign.center,
             ),
           ),
           const SizedBox(height: 24),
@@ -502,9 +507,13 @@ class _SignupScreenState extends State<SignupScreen> {
       child: Form(
         key: _formKeys[1],
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Text('Verify your PAN details', style: AppTextStyles.body),
+            const Text(
+              'Verify your PAN details',
+              style: AppTextStyles.body,
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 24),
             CustomTextField(
               label: 'PAN Number',
@@ -601,9 +610,13 @@ class _SignupScreenState extends State<SignupScreen> {
       child: Form(
         key: _formKeys[2],
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Text('Verify your GSTIN details', style: AppTextStyles.body),
+            const Text(
+              'Verify your GSTIN details',
+              style: AppTextStyles.body,
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 24),
             CustomTextField(
               label: 'GSTIN',

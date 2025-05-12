@@ -109,6 +109,17 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           _screens[_currentIndex],
 
+          // Semi-transparent overlay when notification panel is open
+          if (_showNotificationPanel)
+            Positioned.fill(
+              child: GestureDetector(
+                onTap: _toggleNotificationPanel,
+                child: Container(
+                  color: Colors.black.withAlpha(77),
+                ), // 0.3 * 255 = 77
+              ),
+            ),
+
           // Notification panel
           if (_showNotificationPanel)
             Positioned(
@@ -116,68 +127,62 @@ class _HomeScreenState extends State<HomeScreen> {
               bottom: 0,
               right: 0,
               width: MediaQuery.of(context).size.width * 0.85,
-              child: GestureDetector(
-                onHorizontalDragEnd: (details) {
-                  if (details.primaryVelocity! > 0) {
-                    _toggleNotificationPanel();
-                  }
-                },
-                child: FadeInRight(
-                  duration: AppDurations.fast,
-                  child: Container(
-                    color: Colors.white,
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text(
-                                'Notifications',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.close),
-                                onPressed: _toggleNotificationPanel,
-                              ),
-                            ],
-                          ),
-                        ),
-                        const Divider(height: 1),
-                        Expanded(
-                          child:
-                              _notifications.isEmpty
-                                  ? const Center(
-                                    child: Text('No notifications'),
-                                  )
-                                  : ListView.builder(
-                                    itemCount: _notifications.length,
-                                    itemBuilder: (context, index) {
-                                      final notification =
-                                          _notifications[index];
-                                      return _buildNotificationItem(
-                                        notification,
-                                      );
-                                    },
+              child: Material(
+                elevation: 8,
+                child: GestureDetector(
+                  onHorizontalDragEnd: (details) {
+                    if (details.primaryVelocity! > 0) {
+                      _toggleNotificationPanel();
+                    }
+                  },
+                  child: FadeInRight(
+                    duration: AppDurations.fast,
+                    child: Container(
+                      color: Colors.white,
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  'Notifications',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
                                   ),
-                        ),
-                      ],
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.close),
+                                  onPressed: _toggleNotificationPanel,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Divider(height: 1),
+                          Expanded(
+                            child:
+                                _notifications.isEmpty
+                                    ? const Center(
+                                      child: Text('No notifications'),
+                                    )
+                                    : ListView.builder(
+                                      itemCount: _notifications.length,
+                                      itemBuilder: (context, index) {
+                                        final notification =
+                                            _notifications[index];
+                                        return _buildNotificationItem(
+                                          notification,
+                                        );
+                                      },
+                                    ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ),
-
-          // Semi-transparent overlay when notification panel is open
-          if (_showNotificationPanel)
-            Positioned.fill(
-              child: GestureDetector(
-                onTap: _toggleNotificationPanel,
-                child: Container(color: Colors.black.withOpacity(0.3)),
               ),
             ),
         ],
@@ -218,7 +223,7 @@ class _HomeScreenState extends State<HomeScreen> {
           color:
               notification['isRead']
                   ? Colors.white
-                  : AppColors.googleBlue.withOpacity(0.05),
+                  : AppColors.googleBlue.withAlpha(13), // 0.05 * 255 = 13
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

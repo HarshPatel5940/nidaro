@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'constants.dart';
 import 'login_screen.dart';
+import 'color_utils.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -187,8 +188,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     decoration: BoxDecoration(
                       color:
                           _profileData['sts'] == 'Active'
-                              ? AppColors.googleGreen.withOpacity(0.1)
-                              : AppColors.googleRed.withOpacity(0.1),
+                              ? AppColors.googleGreen.withAlpha(
+                                ColorUtils.alpha10Percent,
+                              )
+                              : AppColors.googleRed.withAlpha(
+                                ColorUtils.alpha10Percent,
+                              ),
                       borderRadius: BorderRadius.circular(AppRadius.small),
                     ),
                     child: Text(
