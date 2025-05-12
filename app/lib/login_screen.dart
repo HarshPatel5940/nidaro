@@ -101,12 +101,11 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   // Helper method to handle login button state
-  VoidCallback getLoginButtonCallback() {
-    return () {
-      if (_otpController.text.length == 6) {
-        _handleLogin();
-      }
-    };
+  VoidCallback? getLoginButtonCallback() {
+    if (_otpController.text.length == 6) {
+      return _handleLogin;
+    }
+    return null;
   }
 
   @override
@@ -161,6 +160,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         controller: _mobileController,
                         keyboardType: TextInputType.phone,
                         validator: _validateMobile,
+                        onChanged: (_) => setState(() {}),
                         prefixIcon: const Icon(
                           Icons.phone_android,
                           color: AppColors.googleBlue,
@@ -174,7 +174,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         duration: AppDurations.fast,
                         child: CustomPrimaryButton(
                           text: 'Send OTP',
-                          onPressed: _handleSendOtp,
+                          onPressed:
+                              _mobileController.text.length == 10
+                                  ? _handleSendOtp
+                                  : null,
                           isLoading: _isLoading,
                         ),
                       ),

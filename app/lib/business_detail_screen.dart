@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'constants.dart';
+import 'color_utils.dart';
 
 class BusinessDetailScreen extends StatefulWidget {
   final Map<String, dynamic> businessData;
@@ -579,7 +580,9 @@ class _ReportBusinessFormState extends State<_ReportBusinessForm> {
                               label: Text(category),
                               backgroundColor:
                                   isSelected
-                                      ? AppColors.googleBlue.withOpacity(0.1)
+                                      ? AppColors.googleBlue.withAlpha(
+                                        ColorUtils.alpha10Percent,
+                                      )
                                       : AppColors.lightGrey,
                               labelStyle: TextStyle(
                                 color:
@@ -678,7 +681,9 @@ class _ReportBusinessFormState extends State<_ReportBusinessForm> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppColors.lightGrey.withOpacity(0.5),
+                      color: AppColors.lightGrey.withAlpha(
+                        ColorUtils.alpha50Percent,
+                      ),
                       borderRadius: BorderRadius.circular(AppRadius.medium),
                     ),
                     child: const Text(

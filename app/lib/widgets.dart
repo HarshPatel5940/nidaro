@@ -5,7 +5,7 @@ import 'constants.dart';
 // Custom Primary Button
 class CustomPrimaryButton extends StatelessWidget {
   final String text;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final bool isLoading;
   final double width;
 

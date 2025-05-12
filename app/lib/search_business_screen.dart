@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'constants.dart';
 import 'business_detail_screen.dart';
+import 'color_utils.dart';
 
 class SearchBusinessScreen extends StatefulWidget {
   const SearchBusinessScreen({super.key});
@@ -237,7 +238,7 @@ class _SearchBusinessScreenState extends State<SearchBusinessScreen> {
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withAlpha(ColorUtils.alpha5Percent),
                 blurRadius: 10,
                 offset: const Offset(0, 2),
               ),
@@ -292,7 +293,9 @@ class _SearchBusinessScreenState extends State<SearchBusinessScreen> {
                         label: Text(filter),
                         selected: isSelected,
                         backgroundColor: Colors.white,
-                        selectedColor: AppColors.googleBlue.withOpacity(0.1),
+                        selectedColor: AppColors.googleBlue.withAlpha(
+                          ColorUtils.alpha10Percent,
+                        ),
                         labelStyle: TextStyle(
                           color:
                               isSelected
@@ -339,7 +342,9 @@ class _SearchBusinessScreenState extends State<SearchBusinessScreen> {
                     Icon(
                       Icons.search_off,
                       size: 64,
-                      color: AppColors.mediumGrey.withOpacity(0.5),
+                      color: AppColors.mediumGrey.withAlpha(
+                        ColorUtils.alpha50Percent,
+                      ),
                     ),
                     const SizedBox(height: 16),
                     const Text(
@@ -353,7 +358,9 @@ class _SearchBusinessScreenState extends State<SearchBusinessScreen> {
                     Text(
                       'Try a different search term or filter',
                       style: TextStyle(
-                        color: AppColors.darkGrey.withOpacity(0.7),
+                        color: AppColors.darkGrey.withAlpha(
+                          ColorUtils.alpha70Percent,
+                        ),
                       ),
                     ),
                   ],
@@ -394,7 +401,7 @@ class _SearchBusinessScreenState extends State<SearchBusinessScreen> {
             borderRadius: BorderRadius.circular(AppRadius.medium),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withAlpha(ColorUtils.alpha5Percent),
                 blurRadius: 10,
                 offset: const Offset(0, 2),
               ),
@@ -412,8 +419,12 @@ class _SearchBusinessScreenState extends State<SearchBusinessScreen> {
                 decoration: BoxDecoration(
                   color:
                       business['sts'] == 'Active'
-                          ? AppColors.googleGreen.withOpacity(0.1)
-                          : AppColors.googleRed.withOpacity(0.1),
+                          ? AppColors.googleGreen.withAlpha(
+                            ColorUtils.alpha10Percent,
+                          )
+                          : AppColors.googleRed.withAlpha(
+                            ColorUtils.alpha10Percent,
+                          ),
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(AppRadius.medium),
                     topRight: Radius.circular(AppRadius.medium),
@@ -440,8 +451,12 @@ class _SearchBusinessScreenState extends State<SearchBusinessScreen> {
                       decoration: BoxDecoration(
                         color:
                             business['sts'] == 'Active'
-                                ? AppColors.googleGreen.withOpacity(0.2)
-                                : AppColors.googleRed.withOpacity(0.2),
+                                ? AppColors.googleGreen.withAlpha(
+                                  ColorUtils.alpha20Percent,
+                                )
+                                : AppColors.googleRed.withAlpha(
+                                  ColorUtils.alpha20Percent,
+                                ),
                         borderRadius: BorderRadius.circular(AppRadius.small),
                       ),
                       child: Text(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'constants.dart';
+import 'color_utils.dart';
 
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({super.key});
@@ -175,14 +176,14 @@ class _ReportsScreenState extends State<ReportsScreen>
           Icon(
             Icons.description_outlined,
             size: 64,
-            color: AppColors.mediumGrey.withOpacity(0.5),
+            color: AppColors.mediumGrey.withAlpha(ColorUtils.alpha50Percent),
           ),
           const SizedBox(height: 16),
           Text(
             message,
             style: TextStyle(
               fontSize: 16,
-              color: AppColors.darkGrey.withOpacity(0.7),
+              color: AppColors.darkGrey.withAlpha(ColorUtils.alpha70Percent),
             ),
             textAlign: TextAlign.center,
           ),
@@ -202,13 +203,7 @@ class _ReportsScreenState extends State<ReportsScreen>
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(AppRadius.medium),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          boxShadow: [ColorUtils.cardShadow],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -216,7 +211,7 @@ class _ReportsScreenState extends State<ReportsScreen>
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.googleBlue.withOpacity(0.05),
+                color: AppColors.googleBlue.withAlpha(ColorUtils.alpha5Percent),
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(AppRadius.medium),
                   topRight: Radius.circular(AppRadius.medium),
@@ -235,7 +230,9 @@ class _ReportsScreenState extends State<ReportsScreen>
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: _getStatusColor(report['status']).withOpacity(0.1),
+                      color: _getStatusColor(
+                        report['status'],
+                      ).withAlpha(ColorUtils.alpha10Percent),
                       borderRadius: BorderRadius.circular(AppRadius.small),
                     ),
                     child: Text(

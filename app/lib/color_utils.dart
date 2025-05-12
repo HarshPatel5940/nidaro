@@ -21,6 +21,13 @@ class ColorUtils {
   static const int alpha30Percent = 77; // 0.3 * 255
   static const int alpha50Percent = 128; // 0.5 * 255
   static const int alpha70Percent = 179; // 0.7 * 255
+
+  // Common BoxShadow for cards
+  static BoxShadow get cardShadow => BoxShadow(
+    color: Colors.black.withAlpha(alpha5Percent),
+    blurRadius: 10,
+    offset: const Offset(0, 2),
+  );
 }
 
 extension ColorExtension on Color {

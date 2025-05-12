@@ -4,6 +4,7 @@ import 'constants.dart';
 import 'search_business_screen.dart';
 import 'reports_screen.dart';
 import 'profile_screen.dart';
+import 'color_utils.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -115,8 +116,8 @@ class _HomeScreenState extends State<HomeScreen> {
               child: GestureDetector(
                 onTap: _toggleNotificationPanel,
                 child: Container(
-                  color: Colors.black.withAlpha(77),
-                ), // 0.3 * 255 = 77
+                  color: Colors.black.withAlpha(ColorUtils.alpha30Percent),
+                ), // Using ColorUtils.alpha30Percent
               ),
             ),
 
@@ -223,7 +224,7 @@ class _HomeScreenState extends State<HomeScreen> {
           color:
               notification['isRead']
                   ? Colors.white
-                  : AppColors.googleBlue.withAlpha(13), // 0.05 * 255 = 13
+                  : AppColors.googleBlue.withAlpha(ColorUtils.alpha5Percent),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

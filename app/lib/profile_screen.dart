@@ -133,7 +133,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: AppColors.googleBlue.withOpacity(0.1),
+                color: AppColors.googleBlue.withAlpha(
+                  ColorUtils.alpha10Percent,
+                ),
                 shape: BoxShape.circle,
               ),
               child: Center(

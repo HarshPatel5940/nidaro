@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'constants.dart';
 import 'widgets.dart';
+import 'color_utils.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -351,6 +352,7 @@ class _SignupScreenState extends State<SignupScreen> {
             hint: 'Enter your business name',
             controller: _businessNameController,
             validator: _validateBusinessName,
+            onChanged: (_) => setState(() {}),
             prefixIcon: const Icon(Icons.business, color: AppColors.googleBlue),
           ),
           const SizedBox(height: 16),
@@ -360,6 +362,7 @@ class _SignupScreenState extends State<SignupScreen> {
             controller: _mobileController,
             keyboardType: TextInputType.phone,
             validator: _validateMobile,
+            onChanged: (_) => setState(() {}),
             prefixIcon: const Icon(
               Icons.phone_android,
               color: AppColors.googleBlue,
@@ -372,6 +375,7 @@ class _SignupScreenState extends State<SignupScreen> {
             controller: _passwordController,
             obscureText: true,
             validator: _validatePassword,
+            onChanged: (_) => setState(() {}),
             prefixIcon: const Icon(
               Icons.lock_outline,
               color: AppColors.googleBlue,
@@ -384,6 +388,7 @@ class _SignupScreenState extends State<SignupScreen> {
             controller: _confirmPasswordController,
             obscureText: true,
             validator: _validateConfirmPassword,
+            onChanged: (_) => setState(() {}),
             prefixIcon: const Icon(
               Icons.lock_outline,
               color: AppColors.googleBlue,
@@ -394,7 +399,13 @@ class _SignupScreenState extends State<SignupScreen> {
           if (!_otpSent) ...[
             CustomPrimaryButton(
               text: 'Get OTP',
-              onPressed: _handleSendOtp,
+              onPressed:
+                  _mobileController.text.length == 10 &&
+                          _passwordController.text.length >= 8 &&
+                          _passwordController.text ==
+                              _confirmPasswordController.text
+                      ? _handleSendOtp
+                      : null,
               isLoading: _isLoading,
             ),
           ] else if (!_otpVerified) ...[
@@ -410,6 +421,9 @@ class _SignupScreenState extends State<SignupScreen> {
                       maxLength: 6,
                       textAlign: TextAlign.center,
                       style: const TextStyle(fontSize: 24, letterSpacing: 10),
+                      onChanged: (text) {
+                        setState(() {});
+                      },
                       decoration: InputDecoration(
                         hintText: '------',
                         counterText: '',
@@ -453,7 +467,10 @@ class _SignupScreenState extends State<SignupScreen> {
                   const SizedBox(height: 24),
                   CustomPrimaryButton(
                     text: 'Verify OTP',
-                    onPressed: _handleVerifyOtp,
+                    onPressed:
+                        _otpController.text.length == 6
+                            ? _handleVerifyOtp
+                            : null,
                     isLoading: _isLoading,
                   ),
                 ],
@@ -484,7 +501,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   const SizedBox(height: 24),
                   CustomPrimaryButton(
                     text: 'Continue',
-                    onPressed: _handleContinue,
+                    onPressed: _otpVerified ? _handleContinue : null,
                     isLoading: _isLoading,
                   ),
                 ],
@@ -520,6 +537,7 @@ class _SignupScreenState extends State<SignupScreen> {
               hint: 'Enter your PAN number',
               controller: _panController,
               validator: _validatePAN,
+              onChanged: (_) => setState(() {}),
               keyboardType: TextInputType.text,
               prefixIcon: const Icon(
                 Icons.credit_card,
@@ -547,7 +565,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   Container(
                     height: 80,
                     decoration: BoxDecoration(
-                      color: AppColors.lightGrey.withOpacity(0.3),
+                      color: AppColors.lightGrey.withAlpha(77),
                       borderRadius: BorderRadius.circular(AppRadius.small),
                     ),
                     alignment: Alignment.center,
@@ -582,6 +600,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     hint: 'Type the captcha shown above',
                     controller: _captchaController,
                     validator: _validateCaptcha,
+                    onChanged: (_) => setState(() {}),
                   ),
                 ],
               ),
@@ -590,7 +609,11 @@ class _SignupScreenState extends State<SignupScreen> {
             const SizedBox(height: 32),
             CustomPrimaryButton(
               text: 'Verify & Continue',
-              onPressed: _handleContinue,
+              onPressed:
+                  _panController.text.length == 10 &&
+                          _captchaController.text.isNotEmpty
+                      ? _handleContinue
+                      : null,
               isLoading: _isLoading,
             ),
           ],
@@ -623,6 +646,7 @@ class _SignupScreenState extends State<SignupScreen> {
               hint: 'Enter your 15-digit GSTIN',
               controller: _gstinController,
               validator: _validateGSTIN,
+              onChanged: (_) => setState(() {}),
               keyboardType: TextInputType.text,
               prefixIcon: const Icon(
                 Icons.receipt_long,
@@ -650,7 +674,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   Container(
                     height: 80,
                     decoration: BoxDecoration(
-                      color: AppColors.lightGrey.withOpacity(0.3),
+                      color: AppColors.lightGrey.withAlpha(77),
                       borderRadius: BorderRadius.circular(AppRadius.small),
                     ),
                     alignment: Alignment.center,
@@ -685,6 +709,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     hint: 'Type the captcha shown above',
                     controller: _gstCaptchaController,
                     validator: _validateCaptcha,
+                    onChanged: (_) => setState(() {}),
                   ),
                 ],
               ),
@@ -693,7 +718,11 @@ class _SignupScreenState extends State<SignupScreen> {
             const SizedBox(height: 32),
             CustomPrimaryButton(
               text: 'Complete Registration',
-              onPressed: _handleContinue,
+              onPressed:
+                  _gstinController.text.length == 15 &&
+                          _gstCaptchaController.text.isNotEmpty
+                      ? _handleContinue
+                      : null,
               isLoading: _isLoading,
             ),
           ],
