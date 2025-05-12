@@ -3,6 +3,9 @@ import 'package:animate_do/animate_do.dart';
 import 'constants.dart';
 import 'widgets.dart';
 import 'signup_screen.dart';
+import 'home_screen.dart';
+import 'home_screen.dart';
+import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -45,15 +48,18 @@ class _LoginScreenState extends State<LoginScreen> {
     if (_otpController.text.length == 6) {
       setState(() {
         _isLoading = true;
-      });
-
-      // Simulate verification
+      }); // Simulate verification
       Future.delayed(AppDurations.medium, () {
         setState(() {
           _isLoading = false;
         });
 
-        // Here you would navigate to the home screen
+        // Navigate to the home screen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Login successful!'),
