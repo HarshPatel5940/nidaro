@@ -15,18 +15,15 @@ class _SignupScreenState extends State<SignupScreen> {
   int _currentStep = 0;
   final int _totalSteps = 3;
 
-  // Controllers for step 1
   final _businessNameController = TextEditingController();
   final _mobileController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _otpController = TextEditingController();
 
-  // Controllers for step 2
   final _panController = TextEditingController();
   final _captchaController = TextEditingController();
 
-  // Controllers for step 3
   final _gstinController = TextEditingController();
   final _gstCaptchaController = TextEditingController();
 
@@ -62,14 +59,13 @@ class _SignupScreenState extends State<SignupScreen> {
         _isLoading = true;
       });
 
-      // Simulate OTP sending
       Future.delayed(AppDurations.medium, () {
         if (!mounted) return;
         setState(() {
           _isLoading = false;
           _otpSent = true;
         });
-        // Show success message
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('OTP sent successfully!'),
@@ -86,7 +82,6 @@ class _SignupScreenState extends State<SignupScreen> {
         _isLoading = true;
       });
 
-      // Simulate verification
       Future.delayed(AppDurations.medium, () {
         if (!mounted) return;
         setState(() {
@@ -128,7 +123,6 @@ class _SignupScreenState extends State<SignupScreen> {
           _isLoading = true;
         });
 
-        // Simulate PAN verification
         Future.delayed(AppDurations.medium, () {
           if (!mounted) return;
           setState(() {
@@ -143,14 +137,12 @@ class _SignupScreenState extends State<SignupScreen> {
           _isLoading = true;
         });
 
-        // Simulate final submission
         Future.delayed(AppDurations.medium, () {
           if (!mounted) return;
           setState(() {
             _isLoading = false;
           });
 
-          // Show completion message and navigate back to login
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Registration completed successfully!'),
@@ -158,7 +150,6 @@ class _SignupScreenState extends State<SignupScreen> {
             ),
           );
 
-          // Navigate back to login
           Navigator.of(context).pop();
         });
       }
@@ -183,7 +174,6 @@ class _SignupScreenState extends State<SignupScreen> {
     }
   }
 
-  // Validation functions
   String? _validateBusinessName(String? value) {
     if (value == null || value.isEmpty) {
       return 'Please enter your business name';
@@ -225,7 +215,7 @@ class _SignupScreenState extends State<SignupScreen> {
     if (value == null || value.isEmpty) {
       return 'Please enter your PAN number';
     }
-    // PAN validation regex: 5 uppercase letters followed by 4 digits and 1 uppercase letter
+
     final RegExp panRegex = RegExp(r'^[A-Z]{5}[0-9]{4}[A-Z]{1}$');
     if (!panRegex.hasMatch(value)) {
       return 'Please enter a valid PAN number';
@@ -244,14 +234,13 @@ class _SignupScreenState extends State<SignupScreen> {
     if (value == null || value.isEmpty) {
       return 'Please enter your GSTIN';
     }
-    // Basic GSTIN validation: 15 characters
+
     if (value.length != 15) {
       return 'GSTIN must be 15 characters';
     }
     return null;
   }
 
-  // Simulate captcha generation
   void _generateCaptcha() {
     setState(() {
       _captchaImage = 'Simulated Captcha Image';
@@ -264,7 +253,6 @@ class _SignupScreenState extends State<SignupScreen> {
     });
   }
 
-  // Helper method to get page title based on current step
   String _getPageTitle() {
     switch (_currentStep) {
       case 0:
@@ -514,7 +502,6 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   Widget _buildStep2() {
-    // If captcha hasn't been generated yet, generate it
     if (_captchaImage == null) {
       _generateCaptcha();
     }
@@ -546,7 +533,6 @@ class _SignupScreenState extends State<SignupScreen> {
             ),
             const SizedBox(height: 24),
 
-            // Captcha section
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -623,7 +609,6 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   Widget _buildStep3() {
-    // If GST captcha hasn't been generated yet, generate it
     if (_gstCaptchaImage == null) {
       _generateGSTCaptcha();
     }
@@ -655,7 +640,6 @@ class _SignupScreenState extends State<SignupScreen> {
             ),
             const SizedBox(height: 24),
 
-            // GST Captcha section
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(

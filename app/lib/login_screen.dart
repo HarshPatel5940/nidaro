@@ -40,14 +40,13 @@ class _LoginScreenState extends State<LoginScreen> {
         _isLoading = true;
       });
 
-      // Simulate OTP sending
       Future.delayed(AppDurations.medium, () {
         if (!mounted) return;
         setState(() {
           _isLoading = false;
           _otpSent = true;
         });
-        // Show success message
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('OTP sent successfully!'),
@@ -63,14 +62,13 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() {
         _isLoading = true;
         _otpError = null;
-      }); // Simulate verification
+      });
       Future.delayed(AppDurations.medium, () {
         if (!mounted) return;
         setState(() {
           _isLoading = false;
         });
 
-        // Navigate to the home screen
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const HomeScreen()),
@@ -100,7 +98,6 @@ class _LoginScreenState extends State<LoginScreen> {
     return null;
   }
 
-  // Helper method to handle login button state
   VoidCallback? getLoginButtonCallback() {
     if (_otpController.text.length == 6) {
       return _handleLogin;
@@ -127,7 +124,6 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               const SizedBox(height: 40),
 
-              // Header
               FadeInDown(
                 duration: AppDurations.medium,
                 child: Column(
@@ -153,7 +149,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     if (!_otpSent) ...[
-                      // Mobile input field
                       CustomTextField(
                         label: 'Mobile Number',
                         hint: 'Enter your 10-digit mobile number',
@@ -169,7 +164,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       const SizedBox(height: 24),
 
-                      // Send OTP Button
                       FadeInUp(
                         duration: AppDurations.fast,
                         child: CustomPrimaryButton(
@@ -182,7 +176,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ] else ...[
-                      // OTP Field
                       FadeInUp(
                         duration: AppDurations.fast,
                         child: Column(
@@ -282,7 +275,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 40),
 
-              // Sign up option - only show when not in OTP mode
               if (!_otpSent)
                 FadeInUp(
                   duration: AppDurations.slow,
@@ -296,7 +288,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         GestureDetector(
                           onTap: () {
-                            // Navigate to sign up screen
                             Navigator.push(
                               context,
                               MaterialPageRoute(

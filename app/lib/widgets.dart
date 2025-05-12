@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'constants.dart';
 
-// Custom Primary Button
 class CustomPrimaryButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;
@@ -40,7 +39,6 @@ class CustomPrimaryButton extends StatelessWidget {
   }
 }
 
-// Custom Secondary Button
 class CustomSecondaryButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
@@ -66,7 +64,6 @@ class CustomSecondaryButton extends StatelessWidget {
   }
 }
 
-// Custom Text Field
 class CustomTextField extends StatelessWidget {
   final String label;
   final String? hint;
@@ -118,7 +115,6 @@ class CustomTextField extends StatelessWidget {
   }
 }
 
-// Custom OTP TextField
 class CustomOtpField extends StatelessWidget {
   final ValueChanged<String> onCompleted;
   final int length;
@@ -134,8 +130,6 @@ class CustomOtpField extends StatelessWidget {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Container(
-            // We're not actually implementing this with pin_code_fields here
-            // as we're using a simpler TextField in the actual screens
             padding: const EdgeInsets.symmetric(vertical: 8.0),
             child: TextField(
               textAlign: TextAlign.center,
@@ -170,7 +164,6 @@ class CustomOtpField extends StatelessWidget {
   }
 }
 
-// Header with back button
 class HeaderWithBackButton extends StatelessWidget {
   final String title;
   final VoidCallback? onBackPressed;
@@ -196,7 +189,6 @@ class HeaderWithBackButton extends StatelessWidget {
   }
 }
 
-// Progress Indicator for multi-step forms
 class StepProgressIndicator extends StatelessWidget {
   final int totalSteps;
   final int currentStep;
@@ -232,7 +224,6 @@ class StepProgressIndicator extends StatelessWidget {
   }
 }
 
-// Animated Container for transitions
 class AnimatedSlideTransition extends StatelessWidget {
   final Widget child;
   final Duration duration;

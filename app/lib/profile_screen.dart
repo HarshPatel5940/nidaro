@@ -12,7 +12,6 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  // Mock business profile data
   final Map<String, dynamic> _profileData = {
     'lgnm': 'Sri Shanker Vijaya Saw Mills',
     'tradeNam': 'Sri Shanker Vijaya Saw Mills',
@@ -42,7 +41,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   };
 
   void _handleLogout() {
-    // Show confirmation dialog
     showDialog(
       context: context,
       builder:
@@ -58,7 +56,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 onPressed: () {
                   Navigator.pop(context);
 
-                  // Navigate to login screen
                   Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(
@@ -215,7 +212,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             IconButton(
               onPressed: () {
-                // Edit profile - just a mock functionality
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('This feature is not available yet.'),
@@ -263,7 +259,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 IconButton(
                   onPressed: () {
-                    // Share business profile - just a mock functionality
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('Business profile shared successfully'),
@@ -278,7 +273,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const Divider(),
 
-            // Business details
             _buildDetailRow('Legal Name (lgnm)', _profileData['lgnm']),
             _buildDetailRow('Trade Name (tradeNam)', _profileData['tradeNam']),
             _buildDetailRow('GSTIN (gstin)', _profileData['gstin']),
@@ -294,7 +288,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _buildDetailRow('Status (sts)', _profileData['sts']),
             _buildDetailRow('Principal Address (pradr)', _profileData['pradr']),
 
-            // Nature of Business Activities
             const SizedBox(height: 8),
             const Text(
               'Nature of Business Activities (nba):',
@@ -481,7 +474,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildSettingItem(String title, String subtitle, IconData icon) {
     return InkWell(
       onTap: () {
-        // Mock functionality
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('$title functionality is not available yet.')),
         );

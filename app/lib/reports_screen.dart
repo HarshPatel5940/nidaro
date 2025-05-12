@@ -303,7 +303,6 @@ class _ReportsScreenState extends State<ReportsScreen>
                       ),
                       TextButton(
                         onPressed: () {
-                          // Show report details
                           _showReportDetails(report, isMyReport);
                         },
                         child: const Text('View Details'),
@@ -406,7 +405,6 @@ class _ReportsScreenState extends State<ReportsScreen>
                     ),
                     const SizedBox(height: 16),
 
-                    // Mock timeline
                     _buildTimelineItem(
                       'Report Submitted',
                       report['date'],

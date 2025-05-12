@@ -79,10 +79,9 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // For full mock data we'll add extra fields that weren't in the card
     Map<String, dynamic> fullBusinessData = {
       ...widget.businessData,
-      // Only add missing fields, don't override existing ones
+
       'tradeNam':
           widget.businessData['tradeNam'] ?? widget.businessData['lgnm'],
       'ctb': widget.businessData['ctb'] ?? 'Partnership',
@@ -102,15 +101,140 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
           widget.businessData['isFieldVisitConducted'] ?? 'No',
     };
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildBusinessDetails(fullBusinessData),
-          const SizedBox(height: 24),
-          _buildReportsSection(),
-        ],
+    return Scaffold(
+      backgroundColor: Colors.grey[100],
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildBusinessHeader(fullBusinessData),
+            const SizedBox(height: 24),
+            _buildBusinessDetails(fullBusinessData),
+            const SizedBox(height: 24),
+            _buildReportsSection(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBusinessHeader(Map<String, dynamic> business) {
+    return FadeInDown(
+      duration: AppDurations.fast,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(AppRadius.medium),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
+          border: Border.all(color: AppColors.lightGrey, width: 0.5),
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: AppColors.googleBlue.withAlpha(
+                  ColorUtils.alpha10Percent,
+                ),
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Text(
+                  business['lgnm'].substring(0, 2),
+                  style: const TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.googleBlue,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    business['lgnm'],
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.confirmation_number_outlined,
+                        size: 14,
+                        color: AppColors.mediumGrey,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        business['gstin'],
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: AppColors.darkGrey,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color:
+                          business['sts'] == 'Active'
+                              ? AppColors.googleGreen.withAlpha(
+                                ColorUtils.alpha10Percent,
+                              )
+                              : AppColors.googleRed.withAlpha(
+                                ColorUtils.alpha10Percent,
+                              ),
+                      borderRadius: BorderRadius.circular(AppRadius.small),
+                    ),
+                    child: Text(
+                      business['sts'],
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color:
+                            business['sts'] == 'Active'
+                                ? AppColors.googleGreen
+                                : AppColors.googleRed,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            IconButton(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Business profile shared successfully'),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.share_outlined),
+              color: AppColors.googleBlue,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -124,46 +248,65 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
           borderRadius: BorderRadius.circular(AppRadius.medium),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withAlpha(AppColors.kAlpha5Percent),
+              color: Colors.black.withOpacity(0.05),
               blurRadius: 10,
               offset: const Offset(0, 2),
             ),
           ],
+          border: Border.all(color: AppColors.lightGrey, width: 0.5),
         ),
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Business Information',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-                color: AppColors.googleBlue,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Business Information',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: AppColors.googleBlue,
+                  ),
+                ),
+                IconButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('View on map feature coming soon'),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.map_outlined),
+                  iconSize: 20,
+                  color: AppColors.googleBlue,
+                ),
+              ],
             ),
-            const SizedBox(height: 20),
-            _buildDetailItem('Legal Name (lgnm)', business['lgnm']),
-            _buildDetailItem('Trade Name (tradeNam)', business['tradeNam']),
-            _buildDetailItem('GSTIN (gstin)', business['gstin']),
-            _buildDetailItem('Constitution of Business (ctb)', business['ctb']),
-            _buildDetailItem('Date of Registration (rgdt)', business['rgdt']),
-            _buildDetailItem('Taxpayer Type (dty)', business['dty']),
-            _buildDetailItem(
+            const Divider(),
+
+            _buildDetailRow('Legal Name (lgnm)', business['lgnm']),
+            _buildDetailRow('Trade Name (tradeNam)', business['tradeNam']),
+            _buildDetailRow('GSTIN (gstin)', business['gstin']),
+            _buildDetailRow('Constitution of Business (ctb)', business['ctb']),
+            _buildDetailRow('Date of Registration (rgdt)', business['rgdt']),
+            _buildDetailRow('Taxpayer Type (dty)', business['dty']),
+            _buildDetailRow(
               'Status (sts)',
               business['sts'],
               business['sts'] == 'Active'
                   ? AppColors.googleGreen
                   : AppColors.googleRed,
             ),
-            _buildDetailItem('Principal Address (pradr)', business['pradr']),
+            _buildDetailRow('Principal Address (pradr)', business['pradr']),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             const Text(
-              'Nature of Business Activities (nba)',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              'Nature of Business Activities (nba):',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             Wrap(
               spacing: 8,
               runSpacing: 8,
@@ -176,13 +319,13 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                       ),
                       decoration: BoxDecoration(
                         color: AppColors.googleBlue.withAlpha(
-                          26,
-                        ), // 0.1 opacity = 26 alpha
+                          ColorUtils.alpha10Percent,
+                        ),
                         borderRadius: BorderRadius.circular(AppRadius.medium),
                         border: Border.all(
                           color: AppColors.googleBlue.withAlpha(
-                            77,
-                          ), // 0.3 opacity = 77 alpha
+                            ColorUtils.alpha30Percent,
+                          ),
                           width: 1,
                         ),
                       ),
@@ -199,26 +342,14 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
             ),
 
             const SizedBox(height: 16),
-            _buildDetailItem('State Jurisdiction (stj)', business['stj']),
-            _buildDetailItem('Central Jurisdiction (ctj)', business['ctj']),
-            _buildDetailItem(
-              'Aadhaar Verification Flag (adhrVFlag)',
-              business['adhrVFlag'],
-            ),
-            _buildDetailItem(
-              'Aadhaar Verification Date (adhrVdt)',
-              business['adhrVdt'],
-            ),
-            _buildDetailItem(
-              'e-KYC Verification Flag (ekycVFlag)',
-              business['ekycVFlag'],
-            ),
-            _buildDetailItem(
-              'e-Invoice Status (einvoiceStatus)',
-              business['einvoiceStatus'],
-            ),
-            _buildDetailItem(
-              'Is Field Visit Conducted (isFieldVisitConducted)',
+            _buildDetailRow('State Jurisdiction', business['stj']),
+            _buildDetailRow('Central Jurisdiction', business['ctj']),
+            _buildDetailRow('Aadhaar Verification Flag', business['adhrVFlag']),
+            _buildDetailRow('Aadhaar Verification Date', business['adhrVdt']),
+            _buildDetailRow('e-KYC Verification Flag', business['ekycVFlag']),
+            _buildDetailRow('e-Invoice Status', business['einvoiceStatus']),
+            _buildDetailRow(
+              'Is Field Visit Conducted',
               business['isFieldVisitConducted'],
             ),
           ],
@@ -227,27 +358,31 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
     );
   }
 
-  Widget _buildDetailItem(String label, String value, [Color? valueColor]) {
+  Widget _buildDetailRow(String label, String value, [Color? valueColor]) {
     return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 15,
-              color: AppColors.darkGrey,
+          SizedBox(
+            width: 120,
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+                color: AppColors.darkGrey,
+              ),
             ),
           ),
-          const SizedBox(height: 6),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 16,
-              color: valueColor ?? Colors.black87,
-              fontWeight: FontWeight.w500,
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 14,
+                color: valueColor ?? Colors.black87,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ],
@@ -256,85 +391,20 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
   }
 
   Widget _buildReportsSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'Verified Reports',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-                color: AppColors.googleBlue,
-              ),
-            ),
-            TextButton.icon(
-              onPressed: () {
-                // Show report business bottom sheet
-                _showReportBusinessSheet();
-              },
-              icon: const Icon(
-                Icons.flag_outlined,
-                color: AppColors.googleRed,
-                size: 18,
-              ),
-              label: const Text(
-                'Report Business',
-                style: TextStyle(
-                  color: AppColors.googleRed,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-
-        // Reports list
-        ..._visibleReports.map((report) => _buildReportCard(report)),
-
-        // Show all reports button
-        if (_mockReports
-                .where((report) => report['status'] == 'Verified')
-                .length >
-            _reportsPerPage)
-          Center(
-            child: TextButton(
-              onPressed: () {
-                setState(() {
-                  _showAllReports = !_showAllReports;
-                });
-              },
-              child: Text(
-                _showAllReports ? 'Show Less' : 'Show All Reports',
-                style: const TextStyle(
-                  color: AppColors.googleBlue,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-
-  Widget _buildReportCard(Map<String, dynamic> report) {
     return FadeInUp(
-      duration: AppDurations.fast,
+      duration: AppDurations.medium,
       child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(AppRadius.medium),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withAlpha(AppColors.kAlpha5Percent),
+              color: Colors.black.withOpacity(0.05),
               blurRadius: 10,
               offset: const Offset(0, 2),
             ),
           ],
+          border: Border.all(color: AppColors.lightGrey, width: 0.5),
         ),
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -343,73 +413,185 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Expanded(
-                  child: Text(
-                    report['title'],
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                const Text(
+                  'Verified Reports',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: AppColors.googleBlue,
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
+                TextButton.icon(
+                  onPressed: () {
+                    _showReportBusinessSheet();
+                  },
+                  icon: const Icon(
+                    Icons.flag_outlined,
+                    color: AppColors.googleRed,
+                    size: 18,
                   ),
-                  decoration: BoxDecoration(
-                    color:
-                        report['status'] == 'Verified'
-                            ? AppColors.googleGreen.withAlpha(
-                              26,
-                            ) // 0.1 opacity = 26 alpha
-                            : AppColors.googleYellow.withAlpha(
-                              26,
-                            ), // 0.1 opacity = 26 alpha
-                    borderRadius: BorderRadius.circular(AppRadius.small),
-                  ),
-                  child: Text(
-                    report['status'],
+                  label: const Text(
+                    'Report Business',
                     style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color:
-                          report['status'] == 'Verified'
-                              ? AppColors.googleGreen
-                              : AppColors.googleYellow,
+                      color: AppColors.googleRed,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
               ],
             ),
+            const Divider(),
             const SizedBox(height: 8),
-            Text(
-              report['description'],
-              style: const TextStyle(fontSize: 14, color: Colors.black87),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'By: ${report['reporter']}',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.mediumGrey,
+
+            if (_visibleReports.isEmpty)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(24.0),
+                  child: Text(
+                    'No verified reports found for this business',
+                    style: TextStyle(
+                      color: AppColors.mediumGrey,
+                      fontStyle: FontStyle.italic,
+                    ),
                   ),
                 ),
-                Text(
-                  report['date'],
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.mediumGrey,
+              ),
+
+            ..._visibleReports.map((report) => _buildReportCard(report)),
+
+            if (_mockReports
+                    .where((report) => report['status'] == 'Verified')
+                    .length >
+                _reportsPerPage)
+              Center(
+                child: TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _showAllReports = !_showAllReports;
+                    });
+                  },
+                  child: Text(
+                    _showAllReports ? 'Show Less' : 'Show All Reports',
+                    style: const TextStyle(
+                      color: AppColors.googleBlue,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-              ],
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReportCard(Map<String, dynamic> report) {
+    return FadeInUp(
+      duration: AppDurations.fast,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(AppRadius.medium),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
             ),
           ],
+          border: Border.all(color: AppColors.lightGrey, width: 0.5),
+        ),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(AppRadius.medium),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(AppRadius.medium),
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Viewing details for report ${report['id']}'),
+                ),
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          report['title'],
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color:
+                              report['status'] == 'Verified'
+                                  ? AppColors.googleGreen.withAlpha(
+                                    ColorUtils.alpha10Percent,
+                                  )
+                                  : AppColors.googleYellow.withAlpha(
+                                    ColorUtils.alpha10Percent,
+                                  ),
+                          borderRadius: BorderRadius.circular(AppRadius.small),
+                        ),
+                        child: Text(
+                          report['status'],
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color:
+                                report['status'] == 'Verified'
+                                    ? AppColors.googleGreen
+                                    : AppColors.googleYellow,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    report['description'],
+                    style: const TextStyle(fontSize: 14, color: Colors.black87),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'By: ${report['reporter']}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.mediumGrey,
+                        ),
+                      ),
+                      Text(
+                        report['date'],
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.mediumGrey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -487,14 +669,12 @@ class _ReportBusinessFormState extends State<_ReportBusinessForm> {
         _isSubmitting = true;
       });
 
-      // Simulate report submission
       Future.delayed(AppDurations.medium, () {
         if (!mounted) return;
         setState(() {
           _isSubmitting = false;
         });
 
-        // Show success message and close the sheet
         Navigator.pop(context);
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -558,7 +738,6 @@ class _ReportBusinessFormState extends State<_ReportBusinessForm> {
                   ),
                   const SizedBox(height: 24),
 
-                  // Report category
                   const Text(
                     'Report Category',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
@@ -606,7 +785,6 @@ class _ReportBusinessFormState extends State<_ReportBusinessForm> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Report title
                   TextFormField(
                     controller: _titleController,
                     decoration: const InputDecoration(
@@ -622,7 +800,6 @@ class _ReportBusinessFormState extends State<_ReportBusinessForm> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Report description
                   TextFormField(
                     controller: _descriptionController,
                     decoration: const InputDecoration(
@@ -643,7 +820,6 @@ class _ReportBusinessFormState extends State<_ReportBusinessForm> {
                   ),
                   const SizedBox(height: 24),
 
-                  // Submit button
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -677,14 +853,17 @@ class _ReportBusinessFormState extends State<_ReportBusinessForm> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Disclaimer
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: AppColors.lightGrey.withAlpha(
-                        ColorUtils.alpha50Percent,
+                        ColorUtils.alpha20Percent,
                       ),
                       borderRadius: BorderRadius.circular(AppRadius.medium),
+                      border: Border.all(
+                        color: AppColors.lightGrey,
+                        width: 0.5,
+                      ),
                     ),
                     child: const Text(
                       'Note: False reporting may lead to legal actions. Please ensure all information provided is accurate to the best of your knowledge.',

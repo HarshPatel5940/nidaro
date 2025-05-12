@@ -18,7 +18,6 @@ class _HomeScreenState extends State<HomeScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _showNotificationPanel = false;
 
-  // Mock notifications
   final List<Map<String, dynamic>> _notifications = [
     {
       'id': 'N1001',
@@ -110,18 +109,16 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           _screens[_currentIndex],
 
-          // Semi-transparent overlay when notification panel is open
           if (_showNotificationPanel)
             Positioned.fill(
               child: GestureDetector(
                 onTap: _toggleNotificationPanel,
                 child: Container(
                   color: Colors.black.withAlpha(ColorUtils.alpha30Percent),
-                ), // Using ColorUtils.alpha30Percent
+                ),
               ),
             ),
 
-          // Notification panel
           if (_showNotificationPanel)
             Positioned(
               top: 0,

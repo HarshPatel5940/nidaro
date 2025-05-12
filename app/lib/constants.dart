@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'color_utils.dart';
 
-// Google Colors Palette
 class AppColors {
   static const Color googleBlue = Color(0xFF4285F4);
   static const Color googleGreen = Color(0xFF34A853);
@@ -9,28 +8,23 @@ class AppColors {
   static const Color googleRed = Color(0xFFEA4335);
   static const Color white = Color(0xFFFFFFFF);
 
-  // Additional utility colors
   static const Color lightGrey = Color(0xFFE0E0E0);
   static const Color mediumGrey = Color(0xFF9E9E9E);
   static const Color darkGrey = Color(0xFF616161);
 
-  // Background and shadow colors
   static const Color background = Color(0xFFF8F9FA);
   static const Color shadow = Color(0x1A000000);
 
-  // Use constants from ColorUtils instead of defining here
   static const int kAlpha5Percent = ColorUtils.alpha5Percent;
   static const int kAlpha10Percent = ColorUtils.alpha10Percent;
   static const int kAlpha30Percent = ColorUtils.alpha30Percent;
   static const int kAlpha50Percent = ColorUtils.alpha50Percent;
 
-  // Keep the helper method for backward compatibility
   static Color withAlphaFromOpacity(Color color, double opacity) {
     return ColorUtils.withAlphaFromOpacity(color, opacity);
   }
 }
 
-// Text Styles
 class AppTextStyles {
   static const TextStyle headline = TextStyle(
     fontSize: 24,
@@ -63,14 +57,12 @@ class AppTextStyles {
   );
 }
 
-// Animation Durations
 class AppDurations {
   static const Duration fast = Duration(milliseconds: 300);
   static const Duration medium = Duration(milliseconds: 500);
   static const Duration slow = Duration(milliseconds: 800);
 }
 
-// Border Radius
 class AppRadius {
   static const double small = 4.0;
   static const double medium = 8.0;
@@ -78,7 +70,6 @@ class AppRadius {
   static const double xLarge = 24.0;
 }
 
-// Button Styles
 class AppButtonStyles {
   static final ButtonStyle primaryButton = ElevatedButton.styleFrom(
     backgroundColor: AppColors.googleBlue,
@@ -100,7 +91,6 @@ class AppButtonStyles {
   );
 }
 
-// Input Decoration
 class AppInputDecorations {
   static InputDecoration textFieldDecoration({
     required String label,

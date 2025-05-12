@@ -17,7 +17,6 @@ class _SearchBusinessScreenState extends State<SearchBusinessScreen> {
   List<String> _filters = ['Name', 'GSTIN', 'PAN', 'Mobile'];
   bool _isSearching = false;
 
-  // Mock data for search results
   final List<Map<String, dynamic>> _mockBusinesses = [
     {
       'lgnm': 'SRI SHANKER VIJAYA SAW MILLS',
@@ -165,7 +164,6 @@ class _SearchBusinessScreenState extends State<SearchBusinessScreen> {
     setState(() {
       _isSearching = true;
 
-      // Filter based on selected criteria
       switch (_selectedFilter) {
         case 'Name':
           _searchResults =
@@ -193,7 +191,6 @@ class _SearchBusinessScreenState extends State<SearchBusinessScreen> {
                   .toList();
           break;
         case 'PAN':
-          // Extract PAN from GSTIN (characters 3-12)
           _searchResults =
               _mockBusinesses.where((business) {
                 String gstin = business['gstin'];
@@ -205,7 +202,6 @@ class _SearchBusinessScreenState extends State<SearchBusinessScreen> {
               }).toList();
           break;
         case 'Mobile':
-          // This is a mock implementation as we don't have mobile numbers in our mock data
           _searchResults =
               _mockBusinesses
                   .where(
@@ -218,7 +214,6 @@ class _SearchBusinessScreenState extends State<SearchBusinessScreen> {
           break;
       }
 
-      // Simulate a delay in searching
       Future.delayed(AppDurations.fast, () {
         setState(() {
           _isSearching = false;
@@ -231,7 +226,6 @@ class _SearchBusinessScreenState extends State<SearchBusinessScreen> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Search bar section
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -246,7 +240,6 @@ class _SearchBusinessScreenState extends State<SearchBusinessScreen> {
           ),
           child: Column(
             children: [
-              // Search field with filter dropdown
               TextField(
                 controller: _searchController,
                 decoration: InputDecoration(
@@ -277,7 +270,6 @@ class _SearchBusinessScreenState extends State<SearchBusinessScreen> {
                 onChanged: _performSearch,
               ),
 
-              // Filter options
               SizedBox(
                 height: 50,
                 child: ListView.builder(
@@ -330,7 +322,6 @@ class _SearchBusinessScreenState extends State<SearchBusinessScreen> {
           ),
         ),
 
-        // Search results section
         _isSearching
             ? const Expanded(child: Center(child: CircularProgressIndicator()))
             : _searchResults.isEmpty
@@ -410,7 +401,6 @@ class _SearchBusinessScreenState extends State<SearchBusinessScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header with status
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
@@ -475,7 +465,6 @@ class _SearchBusinessScreenState extends State<SearchBusinessScreen> {
                 ),
               ),
 
-              // Business details
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -501,7 +490,6 @@ class _SearchBusinessScreenState extends State<SearchBusinessScreen> {
                     ),
                     const SizedBox(height: 8),
 
-                    // Nature of Business
                     Text(
                       'Nature of Business: ${business['nba'].take(2).join(', ')}${business['nba'].length > 2 ? '...' : ''}',
                       style: const TextStyle(color: AppColors.darkGrey),
