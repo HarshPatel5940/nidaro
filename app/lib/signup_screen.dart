@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:flutter/material.dart';
+
 import 'constants.dart';
 import 'widgets.dart';
-import 'color_utils.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -94,6 +94,7 @@ class _SignupScreenState extends State<SignupScreen> {
             backgroundColor: AppColors.googleGreen,
           ),
         );
+        _goToNextStep();
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -112,7 +113,7 @@ class _SignupScreenState extends State<SignupScreen> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Please verify your mobile number first'),
+            content: Text('Please Enter you mobile number first'),
             backgroundColor: AppColors.googleRed,
           ),
         );
@@ -286,7 +287,10 @@ class _SignupScreenState extends State<SignupScreen> {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24,
+                vertical: 8, // Add some vertical padding
+              ),
               child: StepProgressIndicator(
                 totalSteps: _totalSteps,
                 currentStep: _currentStep,
@@ -294,9 +298,13 @@ class _SignupScreenState extends State<SignupScreen> {
             ),
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24.0),
-                child: AnimatedSwitcher(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24.0,
+                  vertical: 16.0, // Add top padding to space from progress bar
+                ),
+                child: AnimatedContainer(
                   duration: AppDurations.medium,
+                  curve: Curves.easeInOut,
                   child: _buildCurrentStep(),
                 ),
               ),
@@ -323,180 +331,186 @@ class _SignupScreenState extends State<SignupScreen> {
   Widget _buildStep1() {
     return Form(
       key: _formKeys[0],
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          FadeInDown(
-            duration: AppDurations.fast,
-            child: const Text(
-              'Let\'s get started with your business details',
-              style: AppTextStyles.body,
-              textAlign: TextAlign.center,
-            ),
-          ),
-          const SizedBox(height: 24),
-          CustomTextField(
-            label: 'Business Name',
-            hint: 'Enter your business name',
-            controller: _businessNameController,
-            validator: _validateBusinessName,
-            onChanged: (_) => setState(() {}),
-            prefixIcon: const Icon(Icons.business, color: AppColors.googleBlue),
-          ),
-          const SizedBox(height: 16),
-          CustomTextField(
-            label: 'Mobile Number',
-            hint: 'Enter your 10-digit mobile number',
-            controller: _mobileController,
-            keyboardType: TextInputType.phone,
-            validator: _validateMobile,
-            onChanged: (_) => setState(() {}),
-            prefixIcon: const Icon(
-              Icons.phone_android,
-              color: AppColors.googleBlue,
-            ),
-          ),
-          const SizedBox(height: 16),
-          CustomTextField(
-            label: 'Password',
-            hint: 'Create a password (min. 8 characters)',
-            controller: _passwordController,
-            obscureText: true,
-            validator: _validatePassword,
-            onChanged: (_) => setState(() {}),
-            prefixIcon: const Icon(
-              Icons.lock_outline,
-              color: AppColors.googleBlue,
-            ),
-          ),
-          const SizedBox(height: 16),
-          CustomTextField(
-            label: 'Confirm Password',
-            hint: 'Re-enter your password',
-            controller: _confirmPasswordController,
-            obscureText: true,
-            validator: _validateConfirmPassword,
-            onChanged: (_) => setState(() {}),
-            prefixIcon: const Icon(
-              Icons.lock_outline,
-              color: AppColors.googleBlue,
-            ),
-          ),
-          const SizedBox(height: 24),
-
-          if (!_otpSent) ...[
-            CustomPrimaryButton(
-              text: 'Get OTP',
-              onPressed:
-                  _mobileController.text.length == 10 &&
-                          _passwordController.text.length >= 8 &&
-                          _passwordController.text ==
-                              _confirmPasswordController.text
-                      ? _handleSendOtp
-                      : null,
-              isLoading: _isLoading,
-            ),
-          ] else if (!_otpVerified) ...[
-            FadeInUp(
+      child: AnimatedContainer(
+        duration: AppDurations.medium,
+        curve: Curves.easeInOut,
+        transform: Matrix4.translationValues(0, _otpSent ? -20 : 0, 0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch, // Changed to stretch
+          children: [
+            FadeInDown(
               duration: AppDurations.fast,
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 40),
-                    child: TextField(
-                      controller: _otpController,
-                      keyboardType: TextInputType.number,
-                      maxLength: 6,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 24, letterSpacing: 10),
-                      onChanged: (text) {
-                        setState(() {});
-                      },
-                      decoration: InputDecoration(
-                        hintText: '------',
-                        counterText: '',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppRadius.medium),
-                          borderSide: const BorderSide(
-                            color: AppColors.lightGrey,
+              child: const Text(
+                'Let\'s get started with your business details',
+                style: AppTextStyles.body,
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 24), // Increased from 16 to 24
+            CustomTextField(
+              label: 'Business Name',
+              hint: 'Enter your business name',
+              controller: _businessNameController,
+              validator: _validateBusinessName,
+              onChanged: (_) => setState(() {}),
+              prefixIcon: const Icon(
+                Icons.business,
+                color: AppColors.googleBlue,
+              ),
+            ),
+            const SizedBox(height: 16),
+            CustomTextField(
+              label: 'Mobile Number',
+              hint: 'Enter your 10-digit mobile number',
+              controller: _mobileController,
+              keyboardType: TextInputType.phone,
+              validator: _validateMobile,
+              onChanged: (_) => setState(() {}),
+              prefixIcon: const Icon(
+                Icons.phone_android,
+                color: AppColors.googleBlue,
+              ),
+            ),
+            const SizedBox(height: 16),
+            CustomTextField(
+              label: 'Password',
+              hint: 'Create a password (min. 8 characters)',
+              controller: _passwordController,
+              obscureText: true,
+              validator: _validatePassword,
+              onChanged: (_) => setState(() {}),
+              prefixIcon: const Icon(
+                Icons.lock_outline,
+                color: AppColors.googleBlue,
+              ),
+            ),
+            if (_passwordController.text.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              PasswordStrengthIndicator(password: _passwordController.text),
+            ],
+            const SizedBox(height: 16),
+            CustomTextField(
+              label: 'Confirm Password',
+              hint: 'Re-enter your password',
+              controller: _confirmPasswordController,
+              obscureText: true,
+              validator: _validateConfirmPassword,
+              onChanged: (_) => setState(() {}),
+              prefixIcon: const Icon(
+                Icons.lock_outline,
+                color: AppColors.googleBlue,
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            if (!_otpSent) ...[
+              CustomPrimaryButton(
+                text: 'Get OTP',
+                onPressed:
+                    _mobileController.text.length == 10 &&
+                            _passwordController.text.length >= 8 &&
+                            _passwordController.text ==
+                                _confirmPasswordController.text
+                        ? _handleSendOtp
+                        : null,
+                isLoading: _isLoading,
+              ),
+            ] else if (!_otpVerified) ...[
+              FadeInUp(
+                duration: AppDurations.fast,
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 40),
+                      child: TextField(
+                        controller: _otpController,
+                        keyboardType: TextInputType.number,
+                        maxLength: 6,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(fontSize: 24, letterSpacing: 10),
+                        onChanged: (text) {
+                          setState(() {});
+                        },
+                        decoration: InputDecoration(
+                          hintText: '------',
+                          counterText: '',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(
+                              AppRadius.medium,
+                            ),
+                            borderSide: const BorderSide(
+                              color: AppColors.lightGrey,
+                            ),
                           ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppRadius.medium),
-                          borderSide: const BorderSide(
-                            color: AppColors.googleBlue,
-                            width: 2,
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(
+                              AppRadius.medium,
+                            ),
+                            borderSide: const BorderSide(
+                              color: AppColors.googleBlue,
+                              width: 2,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        "Didn't receive OTP? ",
-                        style: AppTextStyles.caption,
-                      ),
-                      GestureDetector(
-                        onTap: _handleSendOtp,
-                        child: const Text(
-                          "Resend",
-                          style: TextStyle(
-                            color: AppColors.googleBlue,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
+                    const SizedBox(height: 12), // Reduced from 16 to 12
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          "Didn't receive OTP? ",
+                          style: AppTextStyles.caption,
+                        ),
+                        GestureDetector(
+                          onTap: _handleSendOtp,
+                          child: const Text(
+                            "Resend",
+                            style: TextStyle(
+                              color: AppColors.googleBlue,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  CustomPrimaryButton(
-                    text: 'Verify OTP',
-                    onPressed:
-                        _otpController.text.length == 6
-                            ? _handleVerifyOtp
-                            : null,
-                    isLoading: _isLoading,
-                  ),
-                ],
+                      ],
+                    ),
+                    const SizedBox(height: 20), // Reduced from 24 to 20
+                    CustomPrimaryButton(
+                      text: 'Verify OTP',
+                      onPressed:
+                          _otpController.text.length == 6
+                              ? _handleVerifyOtp
+                              : null,
+                      isLoading: _isLoading,
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ] else ...[
-            FadeInUp(
-              duration: AppDurations.fast,
-              child: Column(
-                children: [
-                  const Row(
-                    children: [
-                      Icon(
-                        Icons.check_circle,
-                        color: AppColors.googleGreen,
-                        size: 20,
+            ] else ...[
+              FadeInUp(
+                duration: AppDurations.fast,
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(
+                      color: AppColors.googleBlue,
+                      strokeWidth: 3,
+                    ),
+                    SizedBox(width: 16),
+                    Text(
+                      'Proceeding to next step...',
+                      style: TextStyle(
+                        color: AppColors.googleBlue,
+                        fontWeight: FontWeight.w500,
                       ),
-                      SizedBox(width: 8),
-                      Text(
-                        'Mobile verified successfully',
-                        style: TextStyle(
-                          color: AppColors.googleGreen,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  CustomPrimaryButton(
-                    text: 'Continue',
-                    onPressed: _otpVerified ? _handleContinue : null,
-                    isLoading: _isLoading,
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
-            ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -511,12 +525,12 @@ class _SignupScreenState extends State<SignupScreen> {
       child: Form(
         key: _formKeys[1],
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch, // Changed to stretch
           children: [
             const Text(
-              'Verify your PAN details',
+              'Enter your PAN details',
               style: AppTextStyles.body,
-              textAlign: TextAlign.center,
+              textAlign: TextAlign.center, // This will now work properly
             ),
             const SizedBox(height: 24),
             CustomTextField(
@@ -536,7 +550,7 @@ class _SignupScreenState extends State<SignupScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.white,
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(AppRadius.medium),
                 border: Border.all(color: AppColors.lightGrey),
               ),
@@ -551,7 +565,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   Container(
                     height: 80,
                     decoration: BoxDecoration(
-                      color: AppColors.lightGrey.withAlpha(77),
+                      color: AppColors.lightGrey.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(AppRadius.small),
                     ),
                     alignment: Alignment.center,
@@ -592,7 +606,7 @@ class _SignupScreenState extends State<SignupScreen> {
               ),
             ),
 
-            const SizedBox(height: 32),
+            const SizedBox(height: 24), // Reduced from 32 to 24
             CustomPrimaryButton(
               text: 'Verify & Continue',
               onPressed:
@@ -618,14 +632,14 @@ class _SignupScreenState extends State<SignupScreen> {
       child: Form(
         key: _formKeys[2],
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch, // Changed to stretch
           children: [
             const Text(
-              'Verify your GSTIN details',
+              'Enter your GSTIN details',
               style: AppTextStyles.body,
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 24), // Reduced from 24 to 20
             CustomTextField(
               label: 'GSTIN',
               hint: 'Enter your 15-digit GSTIN',
@@ -638,12 +652,12 @@ class _SignupScreenState extends State<SignupScreen> {
                 color: AppColors.googleBlue,
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 24), // Reduced from 32 to 24
 
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.white,
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(AppRadius.medium),
                 border: Border.all(color: AppColors.lightGrey),
               ),
@@ -658,7 +672,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   Container(
                     height: 80,
                     decoration: BoxDecoration(
-                      color: AppColors.lightGrey.withAlpha(77),
+                      color: AppColors.lightGrey.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(AppRadius.small),
                     ),
                     alignment: Alignment.center,
@@ -699,7 +713,7 @@ class _SignupScreenState extends State<SignupScreen> {
               ),
             ),
 
-            const SizedBox(height: 32),
+            const SizedBox(height: 24), // Reduced from 32 to 24
             CustomPrimaryButton(
               text: 'Complete Registration',
               onPressed:

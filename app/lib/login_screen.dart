@@ -1,9 +1,10 @@
-import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:flutter/material.dart';
+
 import 'constants.dart';
-import 'widgets.dart';
-import 'signup_screen.dart';
 import 'home_screen.dart';
+import 'signup_screen.dart';
+import 'widgets.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -88,6 +89,14 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  void _goBackToMobileEntry() {
+    setState(() {
+      _otpSent = false;
+      _otpController.clear();
+      _otpError = null;
+    });
+  }
+
   String? _validateMobile(String? value) {
     if (value == null || value.isEmpty) {
       return 'Please enter your mobile number';
@@ -117,198 +126,219 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 40),
+        child: Center(
+          // Wrap with Center widget to center vertically
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(
+                  height: 20,
+                ), // Reduced from 40 to balance vertical centering
 
-              FadeInDown(
-                duration: AppDurations.medium,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const Text('Welcome back!', style: AppTextStyles.headline),
-                    const SizedBox(height: 8),
-                    Text(
-                      _otpSent
-                          ? 'Please enter the OTP sent to +91 ${_mobileController.text}'
-                          : 'Login with your mobile number',
-                      style: AppTextStyles.caption,
-                    ),
-                  ],
+                FadeInDown(
+                  duration: AppDurations.medium,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Text(
+                        'Welcome back!',
+                        style: AppTextStyles.headline,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        _otpSent
+                            ? 'Please enter the OTP sent to +91 ${_mobileController.text}'
+                            : 'Login with your mobile number',
+                        style: AppTextStyles.caption,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
 
-              const SizedBox(height: 40),
+                const SizedBox(height: 40),
 
-              Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    if (!_otpSent) ...[
-                      CustomTextField(
-                        label: 'Mobile Number',
-                        hint: 'Enter your 10-digit mobile number',
-                        controller: _mobileController,
-                        keyboardType: TextInputType.phone,
-                        validator: _validateMobile,
-                        onChanged: (_) => setState(() {}),
-                        prefixIcon: const Icon(
-                          Icons.phone_android,
-                          color: AppColors.googleBlue,
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (!_otpSent) ...[
+                        CustomTextField(
+                          label: 'Mobile Number',
+                          hint: 'Enter your 10-digit mobile number',
+                          controller: _mobileController,
+                          keyboardType: TextInputType.phone,
+                          validator: _validateMobile,
+                          onChanged: (_) => setState(() {}),
+                          prefixIcon: const Icon(
+                            Icons.phone_android,
+                            color: AppColors.googleBlue,
+                          ),
                         ),
-                      ),
 
-                      const SizedBox(height: 24),
+                        const SizedBox(height: 24),
 
-                      FadeInUp(
-                        duration: AppDurations.fast,
-                        child: CustomPrimaryButton(
-                          text: 'Send OTP',
-                          onPressed:
-                              _mobileController.text.length == 10
-                                  ? _handleSendOtp
-                                  : null,
-                          isLoading: _isLoading,
+                        FadeInUp(
+                          duration: AppDurations.fast,
+                          child: CustomPrimaryButton(
+                            text: 'Send OTP',
+                            onPressed:
+                                _mobileController.text.length == 10
+                                    ? _handleSendOtp
+                                    : null,
+                            isLoading: _isLoading,
+                          ),
                         ),
-                      ),
-                    ] else ...[
-                      FadeInUp(
-                        duration: AppDurations.fast,
-                        child: Column(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 40,
-                              ),
-                              child: TextField(
-                                controller: _otpController,
-                                keyboardType: TextInputType.number,
-                                maxLength: 6,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontSize: 24,
-                                  letterSpacing: 10,
-                                ),
-                                onChanged: (text) {
-                                  setState(() {});
-                                },
-                                decoration: InputDecoration(
-                                  hintText: '------',
-                                  counterText: '',
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(
-                                      AppRadius.medium,
-                                    ),
-                                    borderSide: const BorderSide(
-                                      color: AppColors.lightGrey,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(
-                                      AppRadius.medium,
-                                    ),
-                                    borderSide: const BorderSide(
-                                      color: AppColors.googleBlue,
-                                      width: 2,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            if (_otpError != null)
+                      ] else ...[
+                        FadeInUp(
+                          duration: AppDurations.fast,
+                          child: Column(
+                            children: [
                               Padding(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 40,
                                 ),
-                                child: Text(
-                                  _otpError!,
-                                  style: const TextStyle(
-                                    color: AppColors.googleRed,
-                                    fontSize: 12,
-                                  ),
+                                child: TextField(
+                                  controller: _otpController,
+                                  keyboardType: TextInputType.number,
+                                  maxLength: 6,
                                   textAlign: TextAlign.center,
-                                ),
-                              ),
-                            const SizedBox(height: 8),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Text(
-                                  "Didn't receive OTP? ",
-                                  style: AppTextStyles.caption,
-                                ),
-                                GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      _otpSent = false;
-                                    });
+                                  style: const TextStyle(
+                                    fontSize: 24,
+                                    letterSpacing: 10,
+                                  ),
+                                  onChanged: (text) {
+                                    setState(() {});
                                   },
-                                  child: const Text(
-                                    "Resend",
-                                    style: TextStyle(
-                                      color: AppColors.googleBlue,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
+                                  decoration: InputDecoration(
+                                    hintText: '------',
+                                    counterText: '',
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(
+                                        AppRadius.medium,
+                                      ),
+                                      borderSide: const BorderSide(
+                                        color: AppColors.lightGrey,
+                                      ),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(
+                                        AppRadius.medium,
+                                      ),
+                                      borderSide: const BorderSide(
+                                        color: AppColors.googleBlue,
+                                        width: 2,
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ],
-                            ),
-                            const SizedBox(height: 24),
-                            CustomPrimaryButton(
-                              text: 'Login',
-                              onPressed: getLoginButtonCallback(),
-                              isLoading: _isLoading,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 40),
-
-              if (!_otpSent)
-                FadeInUp(
-                  duration: AppDurations.slow,
-                  child: Center(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          "Don't have an account? ",
-                          style: AppTextStyles.caption,
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const SignupScreen(),
                               ),
-                            );
-                          },
-                          child: const Text(
-                            "Sign Up",
-                            style: TextStyle(
-                              color: AppColors.googleBlue,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
+                              const SizedBox(height: 8),
+                              if (_otpError != null)
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 40,
+                                  ),
+                                  child: Text(
+                                    _otpError!,
+                                    style: const TextStyle(
+                                      color: AppColors.googleRed,
+                                      fontSize: 12,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              const SizedBox(height: 8),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Text(
+                                    "Didn't receive OTP? ",
+                                    style: AppTextStyles.caption,
+                                  ),
+                                  GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        _otpSent = false;
+                                      });
+                                    },
+                                    child: const Text(
+                                      "Resend",
+                                      style: TextStyle(
+                                        color: AppColors.googleBlue,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              // Add back button option
+                              GestureDetector(
+                                onTap: _goBackToMobileEntry,
+                                child: const Text(
+                                  "Change mobile number",
+                                  style: TextStyle(
+                                    color: AppColors.googleBlue,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                              CustomPrimaryButton(
+                                text: 'Login',
+                                onPressed: getLoginButtonCallback(),
+                                isLoading: _isLoading,
+                              ),
+                            ],
                           ),
                         ),
                       ],
-                    ),
+                    ],
                   ),
                 ),
-            ],
+
+                const SizedBox(height: 40),
+
+                if (!_otpSent)
+                  FadeInUp(
+                    duration: AppDurations.slow,
+                    child: Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            "Don't have an account? ",
+                            style: AppTextStyles.caption,
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const SignupScreen(),
+                                ),
+                              );
+                            },
+                            child: const Text(
+                              "Sign Up",
+                              style: TextStyle(
+                                color: AppColors.googleBlue,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
