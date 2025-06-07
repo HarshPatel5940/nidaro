@@ -36,7 +36,6 @@ export class GSTPortalService {
     error?: string;
   }> {
     try {
-      // Initialize session first
       await this.initializeSession();
 
       const randomParam = Math.random();

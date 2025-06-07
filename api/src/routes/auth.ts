@@ -14,13 +14,14 @@ import {
   setSecureCookie,
   addExpiryTime,
   isExpired,
-  isValidPAN,
-  isValidGSTIN,
+  validatePhoneNumber,
+  validateGSTIN,
+  validatePAN,
+  sanitizeInput,
 } from '../utils';
 
 const auth = new Hono<{ Bindings: Env; Variables: Variables }>();
 
-// Login with mobile OTP - Send OTP
 auth.post(
   '/login/mobile/otp',
   zValidator(
@@ -33,13 +34,14 @@ auth.post(
     try {
       const { mobileNo } = c.req.valid('json');
 
-      if (!isValidMobileNumber(mobileNo)) {
+      const sanitizedMobile = sanitizeInput(mobileNo);
+
+      if (!validatePhoneNumber(sanitizedMobile)) {
         return c.json({ error: 'Invalid mobile number format' }, 400);
       }
 
-      const formattedMobile = formatMobileNumber(mobileNo);
+      const formattedMobile = formatMobileNumber(sanitizedMobile);
 
-      // Check if user exists
       const user = await c.env.DB.prepare('SELECT id, mobile_no FROM users WHERE mobile_no = ?')
         .bind(formattedMobile)
         .first();
@@ -67,7 +69,6 @@ auth.post(
   }
 );
 
-// Login with mobile OTP - Verify OTP
 auth.post(
   '/login/mobile/verify',
   zValidator(
@@ -82,7 +83,6 @@ auth.post(
       const { mobileNo, otp } = c.req.valid('json');
       const formattedMobile = formatMobileNumber(mobileNo);
 
-      // Get user
       const user = await c.env.DB.prepare('SELECT * FROM users WHERE mobile_no = ?')
         .bind(formattedMobile)
         .first();
@@ -98,18 +98,16 @@ auth.post(
         return c.json({ error: result.error || 'Invalid OTP' }, 400);
       }
 
-      // Create JWT token
-      const token = createJWT(
+      const token = await createJWT(
         {
           userId: user.id,
           mobileNo: user.mobile_no,
           businessName: user.business_name,
-          exp: Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60, // 7 days
+          exp: Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60,
         },
         c.env.JWT_SECRET
       );
 
-      // Set secure cookie
       await setSecureCookie(c, 'auth_token', token);
 
       return c.json({
@@ -130,7 +128,6 @@ auth.post(
   }
 );
 
-// Signup Step 1 - Send OTP
 auth.post(
   '/signup/step/1',
   zValidator(
@@ -151,7 +148,6 @@ auth.post(
 
       const formattedMobile = formatMobileNumber(mobileNo);
 
-      // Check if user already exists
       const existingUser = await c.env.DB.prepare(
         'SELECT id, verification_phase FROM users WHERE mobile_no = ?'
       )
@@ -168,7 +164,6 @@ auth.post(
             409
           );
         }
-        // If user exists but hasn't completed step 1, allow re-sending OTP
       }
 
       const twilioService = new TwilioService(c.env);
@@ -178,7 +173,6 @@ auth.post(
         return c.json({ error: result.error }, 500);
       }
 
-      // Store signup data temporarily in KV
       const signupData = {
         businessName,
         mobileNo: formattedMobile,
@@ -186,11 +180,9 @@ auth.post(
         timestamp: Date.now(),
       };
 
-      await c.env.NIDARO_KV.put(
-        `signup:${formattedMobile}`,
-        JSON.stringify(signupData),
-        { expirationTtl: 600 } // 10 minutes
-      );
+      await c.env.NIDARO_KV.put(`signup:${formattedMobile}`, JSON.stringify(signupData), {
+        expirationTtl: 600,
+      });
 
       return c.json({
         success: true,
@@ -204,7 +196,6 @@ auth.post(
   }
 );
 
-// Signup Step 1 - Verify OTP
 auth.post(
   '/signup/step/1/verify',
   zValidator(
@@ -219,7 +210,6 @@ auth.post(
       const { mobileNo, otp } = c.req.valid('json');
       const formattedMobile = formatMobileNumber(mobileNo);
 
-      // Get signup data from KV
       const signupDataStr = await c.env.NIDARO_KV.get(`signup:${formattedMobile}`);
       if (!signupDataStr) {
         return c.json({ error: 'Signup session expired. Please start again.' }, 400);
@@ -234,13 +224,11 @@ auth.post(
         return c.json({ error: result.error || 'Invalid OTP' }, 400);
       }
 
-      // Check if user exists
       let user = await c.env.DB.prepare('SELECT id FROM users WHERE mobile_no = ?')
         .bind(formattedMobile)
         .first();
 
       if (!user) {
-        // Create new user
         const userId = generateId();
         await c.env.DB.prepare(
           `
@@ -253,7 +241,6 @@ auth.post(
 
         user = { id: userId };
       } else {
-        // Update existing user to phase 2
         await c.env.DB.prepare(
           `
           UPDATE users 
@@ -265,7 +252,6 @@ auth.post(
           .run();
       }
 
-      // Clean up KV
       await c.env.NIDARO_KV.delete(`signup:${formattedMobile}`);
 
       return c.json({
@@ -281,7 +267,6 @@ auth.post(
   }
 );
 
-// Signup Step 2 - Submit PAN details
 auth.post(
   '/signup/step/2',
   zValidator(
@@ -296,15 +281,12 @@ auth.post(
   async c => {
     try {
       const { userPan, userPanName, userDOB, userPanMob } = c.req.valid('json');
+      const sanitizedPan = sanitizeInput(userPan);
 
-      if (!isValidPAN(userPan)) {
+      if (!validatePAN(sanitizedPan)) {
         return c.json({ error: 'Invalid PAN format' }, 400);
       }
 
-      // For now, we'll simulate PAN verification step 1
-      // In real implementation, this would call the PAN verification API
-
-      // Store PAN verification data temporarily
       const sessionId = generateId();
       const panVerificationData = {
         userPan,
@@ -312,13 +294,13 @@ auth.post(
         userDOB,
         userPanMob,
         step: 'pan_verification_p1',
-        expiresAt: addExpiryTime(15), // 15 minutes
+        expiresAt: addExpiryTime(15),
       };
 
       await c.env.NIDARO_KV.put(
         `pan_verification:${sessionId}`,
         JSON.stringify(panVerificationData),
-        { expirationTtl: 900 } // 15 minutes
+        { expirationTtl: 900 }
       );
 
       return c.json({
@@ -334,7 +316,6 @@ auth.post(
   }
 );
 
-// Signup Step 2 - Verify PAN (simulated)
 auth.post(
   '/signup/step/2/verify',
   zValidator(
@@ -348,7 +329,6 @@ auth.post(
     try {
       const { sessionId, verificationCode } = c.req.valid('json');
 
-      // Get PAN verification data
       const dataStr = await c.env.NIDARO_KV.get(`pan_verification:${sessionId}`);
       if (!dataStr) {
         return c.json({ error: 'Session expired or invalid' }, 400);
@@ -361,12 +341,10 @@ auth.post(
         return c.json({ error: 'Session expired' }, 400);
       }
 
-      // For demo purposes, accept any 6-digit code
       if (!/^\d{6}$/.test(verificationCode)) {
         return c.json({ error: 'Invalid verification code format' }, 400);
       }
 
-      // Update user with PAN details and move to phase 3
       await c.env.DB.prepare(
         `
         UPDATE users 
@@ -380,11 +358,10 @@ auth.post(
           panData.userPanName,
           panData.userDOB,
           panData.userPanMob,
-          panData.userPanMob // Using PAN mobile as identifier for now
+          panData.userPanMob
         )
         .run();
 
-      // Clean up session
       await c.env.NIDARO_KV.delete(`pan_verification:${sessionId}`);
 
       return c.json({
@@ -399,7 +376,6 @@ auth.post(
   }
 );
 
-// Signup Step 3 - PAN to GST (Get GSTIN and first captcha)
 auth.post(
   '/signup/step/3',
   zValidator(
@@ -411,8 +387,9 @@ auth.post(
   async c => {
     try {
       const { userPan } = c.req.valid('json');
+      const sanitizedPan = sanitizeInput(userPan);
 
-      if (!isValidPAN(userPan)) {
+      if (!validatePAN(sanitizedPan)) {
         return c.json({ error: 'Invalid PAN format' }, 400);
       }
 
@@ -423,14 +400,13 @@ auth.post(
         return c.json({ error: captchaResult.error }, 500);
       }
 
-      // Store captcha session
       const sessionId = generateId();
       const captchaSession = {
         sessionId,
         purpose: 'pan_to_gst',
         contextData: JSON.stringify({ userPan }),
         cookies: captchaResult.cookies,
-        expiresAt: addExpiryTime(10), // 10 minutes
+        expiresAt: addExpiryTime(10),
       };
 
       await c.env.DB.prepare(
@@ -463,7 +439,6 @@ auth.post(
   }
 );
 
-// Signup Step 4 - Submit PAN to GST captcha and get GST details captcha
 auth.post(
   '/signup/step/4',
   zValidator(
@@ -477,7 +452,6 @@ auth.post(
     try {
       const { sessionId, captchaInput } = c.req.valid('json');
 
-      // Get captcha session
       const captchaSession = await c.env.DB.prepare(
         `
         SELECT * FROM captcha_sessions 
@@ -501,7 +475,6 @@ auth.post(
       const contextData = JSON.parse((captchaSession as any).context_data);
       const gstService = new GSTPortalService();
 
-      // Query PAN to get GSTIN
       const panResult = await gstService.queryPanToGst(
         contextData.userPan,
         captchaInput,
@@ -519,13 +492,11 @@ auth.post(
 
       const gstin = gstinResList[0].gstin;
 
-      // Get new captcha for GST details
       const newCaptchaResult = await gstService.getCaptcha();
       if (!newCaptchaResult.success) {
         return c.json({ error: 'Failed to get GST details captcha' }, 500);
       }
 
-      // Create new captcha session for GST details
       const newSessionId = generateId();
       await c.env.DB.prepare(
         `
@@ -547,7 +518,6 @@ auth.post(
         )
         .run();
 
-      // Clean up old session
       await c.env.DB.prepare('DELETE FROM captcha_sessions WHERE session_id = ?')
         .bind(sessionId)
         .run();
@@ -567,7 +537,6 @@ auth.post(
   }
 );
 
-// Signup Step 5 - Get complete GST details and finish signup
 auth.post(
   '/signup/step/5',
   zValidator(
@@ -581,7 +550,6 @@ auth.post(
     try {
       const { sessionId, captchaInput } = c.req.valid('json');
 
-      // Get captcha session
       const captchaSession = await c.env.DB.prepare(
         `
         SELECT * FROM captcha_sessions 
@@ -605,7 +573,6 @@ auth.post(
       const contextData = JSON.parse((captchaSession as any).context_data);
       const gstService = new GSTPortalService();
 
-      // Get complete taxpayer details
       const taxpayerResult = await gstService.getTaxpayerDetails(
         contextData.gstin,
         captchaInput,
@@ -616,7 +583,6 @@ auth.post(
         return c.json({ error: taxpayerResult.error || 'Failed to fetch business details' }, 400);
       }
 
-      // Get goods and services
       const goodsServicesResult = await gstService.getGoodsServices(
         contextData.gstin,
         contextData.cookies
@@ -627,7 +593,6 @@ auth.post(
         goods_services: goodsServicesResult.success ? goodsServicesResult.data : null,
       };
 
-      // Update user with GSTIN and set as verified
       await c.env.DB.prepare(
         `
         UPDATE users 
@@ -638,13 +603,11 @@ auth.post(
         .bind(contextData.gstin, contextData.userPan)
         .run();
 
-      // Get the updated user
       const user = await c.env.DB.prepare('SELECT id FROM users WHERE user_pan = ?')
         .bind(contextData.userPan)
         .first();
 
       if (user) {
-        // Store business details
         await c.env.DB.prepare(
           `
           INSERT INTO business_details (
@@ -668,7 +631,6 @@ auth.post(
           .run();
       }
 
-      // Clean up session
       await c.env.DB.prepare('DELETE FROM captcha_sessions WHERE session_id = ?')
         .bind(sessionId)
         .run();

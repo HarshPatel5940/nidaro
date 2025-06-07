@@ -1,23 +1,19 @@
 #!/usr/bin/env bun
 
-// Development setup script for Nidaro API with Bun
 import { $ } from 'bun';
 
 async function setupDevelopment() {
   console.log('🚀 Setting up Nidaro API development environment with Bun...\n');
 
   try {
-    // Install dependencies
     console.log('📦 Installing dependencies...');
     await $`bun install`;
     console.log('✅ Dependencies installed\n');
 
-    // Generate Cloudflare types
     console.log('🔧 Generating Cloudflare types...');
     await $`bun run cf-typegen`;
     console.log('✅ Types generated\n');
 
-    // Create D1 database
     console.log('🗄️  Creating D1 database...');
     try {
       const dbResult = await $`wrangler d1 create nidaro-db`.text();
@@ -27,7 +23,6 @@ async function setupDevelopment() {
       console.log('ℹ️  D1 database might already exist or wrangler not logged in\n');
     }
 
-    // Create KV namespace
     console.log('🗂️  Creating KV namespace...');
     try {
       const kvResult = await $`wrangler kv:namespace create NIDARO_KV`.text();
@@ -37,7 +32,6 @@ async function setupDevelopment() {
       console.log('ℹ️  KV namespace might already exist or wrangler not logged in\n');
     }
 
-    // Create preview KV namespace
     try {
       const kvPreviewResult = await $`wrangler kv:namespace create NIDARO_KV --preview`.text();
       console.log('✅ KV preview namespace created');
@@ -63,7 +57,6 @@ async function setupDevelopment() {
   }
 }
 
-// Run the setup
 if (import.meta.main) {
   await setupDevelopment();
 }

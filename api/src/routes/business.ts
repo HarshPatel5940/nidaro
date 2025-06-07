@@ -4,14 +4,18 @@ import { z } from 'zod';
 import type { Env, Variables, AppContext } from '../types';
 import { GSTPortalService } from '../services/gst';
 import { authMiddleware } from '../middleware';
-import { isValidGSTIN, isValidPAN, isValidMobileNumber } from '../utils';
+import {
+  isValidMobileNumber,
+  validateGSTIN,
+  validatePAN,
+  validatePhoneNumber,
+  sanitizeInput,
+} from '../utils';
 
 const business = new Hono<{ Bindings: Env; Variables: Variables }>();
 
-// Apply auth middleware to all business routes
 business.use('*', authMiddleware);
 
-// Search business by type and value
 business.get(
   '/',
   zValidator(
@@ -24,11 +28,12 @@ business.get(
   async c => {
     try {
       const { type, value } = c.req.valid('json');
+      const sanitizedValue = sanitizeInput(value);
       let results: any;
 
       switch (type) {
         case 'gstin':
-          if (!isValidGSTIN(value)) {
+          if (!validateGSTIN(sanitizedValue)) {
             return c.json({ error: 'Invalid GSTIN format' }, 400);
           }
 
@@ -43,12 +48,12 @@ business.get(
             WHERE bd.gstin = ?
           `
           )
-            .bind(value)
+            .bind(sanitizedValue)
             .all();
           break;
 
         case 'pan':
-          if (!isValidPAN(value)) {
+          if (!validatePAN(sanitizedValue)) {
             return c.json({ error: 'Invalid PAN format' }, 400);
           }
 
@@ -63,18 +68,18 @@ business.get(
             WHERE u.user_pan = ?
           `
           )
-            .bind(value)
+            .bind(sanitizedValue)
             .all();
           break;
 
         case 'mobile':
-          if (!isValidMobileNumber(value)) {
+          if (!validatePhoneNumber(sanitizedValue)) {
             return c.json({ error: 'Invalid mobile number format' }, 400);
           }
 
-          const formattedMobile = value.startsWith('+91')
-            ? value
-            : `+91${value.replace(/\D/g, '')}`;
+          const formattedMobile = sanitizedValue.startsWith('+91')
+            ? sanitizedValue
+            : `+91${sanitizedValue.replace(/\D/g, '')}`;
           results = await c.env.DB.prepare(
             `
             SELECT 
@@ -110,23 +115,25 @@ business.get(
           return c.json({ error: 'Invalid search type' }, 400);
       }
 
-      // Also get reports count for each business
-      const businessesWithReports = await Promise.all(
-        results.results.map(async (business: any) => {
-          const reportsCount = await c.env.DB.prepare(
-            `
-            SELECT COUNT(*) as count FROM reports WHERE reported_business_gstin = ?
-          `
-          )
-            .bind(business.gstin)
-            .first();
+      const gstins = results.results.map((business: any) => business.gstin);
+      const reportCountsQuery = `
+        SELECT reported_business_gstin, COUNT(*) as count
+        FROM reports 
+        WHERE reported_business_gstin IN (${gstins.map(() => '?').join(',')})
+        GROUP BY reported_business_gstin
+      `;
+      const reportCounts = await c.env.DB.prepare(reportCountsQuery)
+        .bind(...gstins)
+        .all();
 
-          return {
-            ...business,
-            reportsCount: reportsCount?.count || 0,
-          };
-        })
+      const reportCountsMap = new Map(
+        reportCounts.results.map((row: any) => [row.reported_business_gstin, row.count])
       );
+
+      const businessesWithReports = results.results.map((business: any) => ({
+        ...business,
+        reportsCount: reportCountsMap.get(business.gstin) || 0,
+      }));
 
       return c.json({
         success: true,
@@ -140,7 +147,6 @@ business.get(
   }
 );
 
-// Refetch business details from government portal
 business.patch('/refetch', async c => {
   try {
     const user = c.get('user');
@@ -148,7 +154,6 @@ business.patch('/refetch', async c => {
       return c.json({ error: 'Authentication required' }, 401);
     }
 
-    // Get user's business details
     const businessDetails = await c.env.DB.prepare(
       `
         SELECT gstin FROM business_details WHERE user_id = ?
@@ -163,7 +168,6 @@ business.patch('/refetch', async c => {
 
     const gstService = new GSTPortalService();
 
-    // Get captcha for fetching fresh data
     const captchaResult = await gstService.getCaptcha();
     if (!captchaResult.success) {
       return c.json({ error: 'Failed to get captcha for data refresh' }, 500);
@@ -174,7 +178,7 @@ business.patch('/refetch', async c => {
       message: 'Please solve the captcha to refresh business data',
       captchaImage: captchaResult.captchaBase64,
       gstin: businessDetails.gstin,
-      // In a real implementation, you'd create a session here similar to signup
+
       instructions: 'Use the /business/refetch/verify endpoint with captcha solution',
     });
   } catch (error) {
@@ -183,7 +187,6 @@ business.patch('/refetch', async c => {
   }
 });
 
-// Verify captcha and complete refetch
 business.post(
   '/refetch/verify',
   zValidator(
@@ -196,22 +199,18 @@ business.post(
   async c => {
     try {
       const { captchaInput, gstin } = c.req.valid('json');
+      const sanitizedGstin = sanitizeInput(gstin);
       const user = c.get('user');
       if (!user) {
         return c.json({ error: 'Authentication required' }, 401);
       }
 
-      if (!isValidGSTIN(gstin)) {
+      if (!validateGSTIN(sanitizedGstin)) {
         return c.json({ error: 'Invalid GSTIN format' }, 400);
       }
 
       const gstService = new GSTPortalService();
 
-      // For demonstration, we'll simulate the captcha verification
-      // In a real implementation, you'd store the cookies from the captcha request
-      // and use them here along with proper session management
-
-      // Simulate fetching fresh data
       const mockFreshData = {
         taxpayer_details: {
           lgnm: 'Updated Legal Name',
@@ -228,7 +227,6 @@ business.post(
         },
       };
 
-      // Update business details in database
       await c.env.DB.prepare(
         `
         UPDATE business_details 

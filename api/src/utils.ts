@@ -2,7 +2,7 @@ import type { Context } from 'hono';
 import type { Env } from './types';
 
 export function generateId(): string {
-  return Math.random().toString(36).substring(2) + Date.now().toString(36);
+  return crypto.randomUUID();
 }
 
 export function isValidMobileNumber(mobile: string): boolean {
@@ -11,7 +11,6 @@ export function isValidMobileNumber(mobile: string): boolean {
 }
 
 export function formatMobileNumber(mobile: string): string {
-  // Remove any non-digit characters and ensure proper format
   const cleaned = mobile.replace(/\D/g, '');
   if (cleaned.startsWith('91') && cleaned.length === 12) {
     return `+${cleaned}`;
@@ -21,14 +20,23 @@ export function formatMobileNumber(mobile: string): string {
   return mobile;
 }
 
-export function isValidPAN(pan: string): boolean {
-  const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
-  return panRegex.test(pan);
-}
-
-export function isValidGSTIN(gstin: string): boolean {
+export function validateGSTIN(gstin: string): boolean {
   const gstinRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
   return gstinRegex.test(gstin);
+}
+
+export function validatePhoneNumber(phone: string): boolean {
+  const phoneRegex = /^[6-9]\d{9}$/;
+  return phoneRegex.test(phone);
+}
+
+export function sanitizeInput(input: string): string {
+  return input.trim().replace(/[<>]/g, '');
+}
+
+export function validatePAN(pan: string): boolean {
+  const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+  return panRegex.test(pan);
 }
 
 export async function setSecureCookie(
@@ -45,7 +53,6 @@ export async function setSecureCookie(
     'SameSite=Strict',
   ];
 
-  // Add Secure flag in production
   const url = new URL(c.req.url);
   if (url.protocol === 'https:') {
     cookieOptions.push('Secure');
@@ -81,22 +88,50 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
   return hashedInput === hash;
 }
 
-export function createJWT(payload: any, secret: string): string {
+export async function createJWT(payload: any, secret: string): Promise<string> {
   const header = { alg: 'HS256', typ: 'JWT' };
   const encodedHeader = btoa(JSON.stringify(header));
   const encodedPayload = btoa(JSON.stringify(payload));
 
-  const signature = btoa(`${encodedHeader}.${encodedPayload}.${secret}`);
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  const signatureBuffer = await crypto.subtle.sign(
+    'HMAC',
+    key,
+    encoder.encode(`${encodedHeader}.${encodedPayload}`)
+  );
+  const signature = btoa(String.fromCharCode(...new Uint8Array(signatureBuffer)));
 
   return `${encodedHeader}.${encodedPayload}.${signature}`;
 }
 
-export function verifyJWT(token: string, secret: string): any {
+export async function verifyJWT(token: string, secret: string): Promise<any> {
   try {
     const [encodedHeader, encodedPayload, signature] = token.split('.');
-    const expectedSignature = btoa(`${encodedHeader}.${encodedPayload}.${secret}`);
 
-    if (signature !== expectedSignature) {
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      'raw',
+      encoder.encode(secret),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['verify']
+    );
+    const signatureBuffer = Uint8Array.from(atob(signature), c => c.charCodeAt(0));
+    const isValid = await crypto.subtle.verify(
+      'HMAC',
+      key,
+      signatureBuffer,
+      encoder.encode(`${encodedHeader}.${encodedPayload}`)
+    );
+
+    if (!isValid) {
       throw new Error('Invalid signature');
     }
 

@@ -7,10 +7,8 @@ import { generateId, isValidGSTIN } from '../utils';
 
 const reports = new Hono<{ Bindings: Env; Variables: Variables }>();
 
-// Apply auth middleware to all report routes
 reports.use('*', authMiddleware);
 
-// Create a new report
 reports.post(
   '/',
   zValidator(
@@ -44,7 +42,6 @@ reports.post(
         return c.json({ error: 'Invalid GSTIN format' }, 400);
       }
 
-      // Check if business exists
       const business = await c.env.DB.prepare(
         `
         SELECT gstin FROM business_details WHERE gstin = ?
@@ -57,7 +54,6 @@ reports.post(
         return c.json({ error: 'Business not found in our database' }, 404);
       }
 
-      // Check if user is trying to report their own business
       const userBusiness = await c.env.DB.prepare(
         `
         SELECT gstin FROM business_details WHERE user_id = ? AND gstin = ?
@@ -70,7 +66,6 @@ reports.post(
         return c.json({ error: 'You cannot report your own business' }, 400);
       }
 
-      // Create report
       const reportId = generateId();
       await c.env.DB.prepare(
         `
@@ -104,7 +99,6 @@ reports.post(
   }
 );
 
-// Get reports by user (reports they made)
 reports.get('/my-reports', async c => {
   try {
     const user = c.get('user');
@@ -140,7 +134,6 @@ reports.get('/my-reports', async c => {
   }
 });
 
-// Get reports on user's business
 reports.get('/on-my-business', async c => {
   try {
     const user = c.get('user');
@@ -187,7 +180,6 @@ reports.get('/on-my-business', async c => {
   }
 });
 
-// Get reports for a specific business (public)
 reports.get('/business/:gstin', async c => {
   try {
     const gstin = c.req.param('gstin');
@@ -221,7 +213,6 @@ reports.get('/business/:gstin', async c => {
   }
 });
 
-// Attest to a report (support or dispute)
 reports.post(
   '/:reportId/attest',
   zValidator(
@@ -240,7 +231,6 @@ reports.post(
         return c.json({ error: 'Authentication required' }, 401);
       }
 
-      // Check if report exists
       const report = await c.env.DB.prepare(
         `
         SELECT * FROM reports WHERE id = ?
@@ -253,12 +243,10 @@ reports.post(
         return c.json({ error: 'Report not found' }, 404);
       }
 
-      // Check if user is trying to attest their own report
       if (report.reporter_id === user.userId) {
         return c.json({ error: 'You cannot attest to your own report' }, 400);
       }
 
-      // Check if user already attested
       const existingAttestation = await c.env.DB.prepare(
         `
         SELECT id FROM attestations WHERE report_id = ? AND attester_id = ?
@@ -271,7 +259,6 @@ reports.post(
         return c.json({ error: 'You have already attested to this report' }, 400);
       }
 
-      // Create attestation
       const attestationId = generateId();
       await c.env.DB.prepare(
         `
@@ -282,7 +269,6 @@ reports.post(
         .bind(attestationId, reportId, user.userId, isSupporting, comments || null)
         .run();
 
-      // Update report attestation count
       await c.env.DB.prepare(
         `
         UPDATE reports 
@@ -310,7 +296,6 @@ reports.post(
   }
 );
 
-// Dispute a verified report (government dispute flag)
 reports.patch(
   '/:reportId/dispute',
   zValidator(
@@ -328,7 +313,6 @@ reports.patch(
         return c.json({ error: 'Authentication required' }, 401);
       }
 
-      // Check if report exists and is verified
       const report = await c.env.DB.prepare(
         `
         SELECT * FROM reports WHERE id = ? AND status = 'verified'
@@ -341,7 +325,6 @@ reports.patch(
         return c.json({ error: 'Report not found or not verified' }, 404);
       }
 
-      // Check if this is the reported business owner
       const businessOwner = await c.env.DB.prepare(
         `
         SELECT user_id FROM business_details WHERE gstin = ?
@@ -354,7 +337,6 @@ reports.patch(
         return c.json({ error: 'Only the reported business owner can dispute this report' }, 403);
       }
 
-      // Update report with government dispute flag
       await c.env.DB.prepare(
         `
         UPDATE reports 
@@ -365,7 +347,6 @@ reports.patch(
         .bind(reportId)
         .run();
 
-      // Store dispute reason in KV for admin review
       await c.env.NIDARO_KV.put(
         `dispute:${reportId}`,
         JSON.stringify({
@@ -388,7 +369,6 @@ reports.patch(
   }
 );
 
-// Get report details with attestations
 reports.get('/:reportId', async c => {
   try {
     const reportId = c.req.param('reportId');
@@ -413,7 +393,6 @@ reports.get('/:reportId', async c => {
       return c.json({ error: 'Report not found' }, 404);
     }
 
-    // Get attestations
     const attestations = await c.env.DB.prepare(
       `
         SELECT 

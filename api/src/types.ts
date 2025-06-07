@@ -9,7 +9,6 @@ export interface Env {
   TWILIO_VERIFY_SERVICE_SID: string;
 }
 
-// Extended context type with user data
 export interface Variables {
   user?: {
     userId: string;
