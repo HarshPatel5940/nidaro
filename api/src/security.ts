@@ -1,3 +1,5 @@
+import { sanitizeInput } from './utils';
+
 export const SECURITY_CONFIG = {
   JWT: {
     EXPIRY_HOURS: 24 * 7,
@@ -55,12 +57,7 @@ export function isSecurePassword(password: string): boolean {
 
 export function sanitizeAndValidateInput(input: string, maxLength?: number): string {
   const max = maxLength || SECURITY_CONFIG.VALIDATION.MAX_INPUT_LENGTH;
-
-  const sanitized = input
-    .trim()
-    .replace(/[<>]/g, '')
-    .replace(/javascript:/gi, '')
-    .replace(/on\w+=/gi, '');
+  const sanitized = sanitizeInput(input);
 
   if (sanitized.length > max) {
     throw new Error(`Input too long. Maximum ${max} characters allowed.`);
