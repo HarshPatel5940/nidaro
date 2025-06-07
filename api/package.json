@@ -1,14 +1,45 @@
 {
-  "name": "api",
+  "name": "nidaro-api",
+  "version": "1.0.0",
+  "description": "Nidaro API - Business fraud and debt reporting platform",
+  "main": "src/index.ts",
+  "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy --minify",
-    "cf-typegen": "wrangler types --env-interface CloudflareBindings"
+    "setup": "bun run scripts/setup-dev.ts",
+    "dev": "bunx wrangler dev",
+    "dev:local": "bun run --watch src/index.ts",
+    "build": "bun build src/index.ts --outdir dist --target node",
+    "deploy": "bunx wrangler deploy --minify",
+    "cf-typegen": "bunx wrangler types --env-interface CloudflareBindings",
+    "db:init": "bunx wrangler d1 execute nidaro-db --local --file=./src/db/schema.sql",
+    "db:init-remote": "bunx wrangler d1 execute nidaro-db --remote --file=./src/db/schema.sql",
+    "db:create": "bunx wrangler d1 create nidaro-db",
+    "db:migrate": "bunx wrangler d1 migrations apply nidaro-db --local",
+    "db:migrate-remote": "bunx wrangler d1 migrations apply nidaro-db",
+    "kv:create": "bunx wrangler kv namespace create NIDARO_KV",
+    "kv:create-preview": "bunx wrangler kv namespace create NIDARO_KV --preview",
+    "secrets:put": "bun run scripts/setup-secrets.ts",
+    "typecheck": "bun tsc --noEmit",
+    "format": "bun x prettier --write src/**/*.ts",
+    "lint": "bun x eslint src/**/*.ts"
   },
   "dependencies": {
-    "hono": "^4.7.9"
+    "hono": "^4.7.9",
+    "@hono/zod-validator": "^0.3.0",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250607.0",
+    "@types/bun": "latest",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0",
+    "eslint": "^8.56.0",
+    "prettier": "^3.1.1",
+    "typescript": "^5.3.3",
     "wrangler": "^4.14.4"
-  }
+  },
+  "engines": {
+    "bun": ">=1.0.0"
+  },
+  "keywords": ["api", "cloudflare", "workers", "business", "fraud", "reporting"]
 }
