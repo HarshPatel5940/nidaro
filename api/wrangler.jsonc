@@ -1,38 +1,26 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "api",
+  "name": "nidaro-api",
   "main": "src/index.ts",
-  "compatibility_date": "2025-05-12"
-  // "compatibility_flags": [
-  //   "nodejs_compat"
-  // ],
-  // "vars": {
-  //   "MY_VAR": "my-variable"
-  // },
-  // "kv_namespaces": [
-  //   {
-  //     "binding": "MY_KV_NAMESPACE",
-  //     "id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-  //   }
-  // ],
-  // "r2_buckets": [
-  //   {
-  //     "binding": "MY_BUCKET",
-  //     "bucket_name": "my-bucket"
-  //   }
-  // ],
-  // "d1_databases": [
-  //   {
-  //     "binding": "MY_DB",
-  //     "database_name": "my-database",
-  //     "database_id": ""
-  //   }
-  // ],
-  // "ai": {
-  //   "binding": "AI"
-  // },
-  // "observability": {
-  //   "enabled": true,
-  //   "head_sampling_rate": 1
-  // }
+  "compatibility_date": "2025-05-12",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "vars": {
+    "JWT_SECRET": "dev-secret-key-change-in-production"
+  },
+  "kv_namespaces": [
+    {
+      "binding": "NIDARO_KV",
+      "id": "ab3cc67627494cd683fc5512fac5312c",
+      "preview_id": "23ba88434ae3408390381371e60cdbc8"
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "nidaro-db",
+      "database_id": "71536657-68b8-400e-8475-e05e43597fc7"
+    }
+  ]
 }
