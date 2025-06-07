@@ -4,13 +4,7 @@ import { z } from 'zod';
 import type { Env, Variables, AppContext } from '../types';
 import { GSTPortalService } from '../services/gst';
 import { authMiddleware } from '../middleware';
-import {
-  isValidMobileNumber,
-  validateGSTIN,
-  validatePAN,
-  validatePhoneNumber,
-  sanitizeInput,
-} from '../utils';
+import { isValidMobileNumber, validateGSTIN, validatePAN, sanitizeInput } from '../utils';
 
 const business = new Hono<{ Bindings: Env; Variables: Variables }>();
 
@@ -73,7 +67,7 @@ business.get(
           break;
 
         case 'mobile':
-          if (!validatePhoneNumber(sanitizedValue)) {
+          if (!isValidMobileNumber(sanitizedValue)) {
             return c.json({ error: 'Invalid mobile number format' }, 400);
           }
 
@@ -107,12 +101,20 @@ business.get(
             WHERE bd.legal_name LIKE ? OR bd.trade_name LIKE ? OR u.business_name LIKE ?
           `
           )
-            .bind(`%${value}%`, `%${value}%`, `%${value}%`)
+            .bind(`%${sanitizedValue}%`, `%${sanitizedValue}%`, `%${sanitizedValue}%`)
             .all();
           break;
 
         default:
           return c.json({ error: 'Invalid search type' }, 400);
+      }
+
+      if (!results.results || results.results.length === 0) {
+        return c.json({
+          success: true,
+          results: [],
+          count: 0,
+        });
       }
 
       const gstins = results.results.map((business: any) => business.gstin);

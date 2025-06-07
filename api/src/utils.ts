@@ -6,6 +6,7 @@ export function generateId(): string {
 }
 
 export function isValidMobileNumber(mobile: string): boolean {
+  // Supports formats: +91XXXXXXXXXX, 91XXXXXXXXXX, XXXXXXXXXX
   const mobileRegex = /^(\+91|91)?[6-9]\d{9}$/;
   return mobileRegex.test(mobile);
 }
@@ -23,11 +24,6 @@ export function formatMobileNumber(mobile: string): string {
 export function validateGSTIN(gstin: string): boolean {
   const gstinRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
   return gstinRegex.test(gstin);
-}
-
-export function validatePhoneNumber(phone: string): boolean {
-  const phoneRegex = /^[6-9]\d{9}$/;
-  return phoneRegex.test(phone);
 }
 
 export function sanitizeInput(input: string): string {
@@ -88,10 +84,24 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
   return hashedInput === hash;
 }
 
+// Base64url encoding helper function
+function base64urlEncode(str: string): string {
+  // First encode to base64, then make it url-safe
+  return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
+
+// Base64url decoding helper function
+function base64urlDecode(str: string): string {
+  // Add padding if needed
+  const padding = '='.repeat((4 - (str.length % 4)) % 4);
+  const base64 = str.replace(/-/g, '+').replace(/_/g, '/') + padding;
+  return atob(base64);
+}
+
 export async function createJWT(payload: any, secret: string): Promise<string> {
   const header = { alg: 'HS256', typ: 'JWT' };
-  const encodedHeader = btoa(JSON.stringify(header));
-  const encodedPayload = btoa(JSON.stringify(payload));
+  const encodedHeader = base64urlEncode(JSON.stringify(header));
+  const encodedPayload = base64urlEncode(JSON.stringify(payload));
 
   const encoder = new TextEncoder();
   const key = await crypto.subtle.importKey(
@@ -106,7 +116,7 @@ export async function createJWT(payload: any, secret: string): Promise<string> {
     key,
     encoder.encode(`${encodedHeader}.${encodedPayload}`)
   );
-  const signature = btoa(String.fromCharCode(...new Uint8Array(signatureBuffer)));
+  const signature = base64urlEncode(String.fromCharCode(...new Uint8Array(signatureBuffer)));
 
   return `${encodedHeader}.${encodedPayload}.${signature}`;
 }
@@ -123,7 +133,7 @@ export async function verifyJWT(token: string, secret: string): Promise<any> {
       false,
       ['verify']
     );
-    const signatureBuffer = Uint8Array.from(atob(signature), c => c.charCodeAt(0));
+    const signatureBuffer = Uint8Array.from(base64urlDecode(signature), c => c.charCodeAt(0));
     const isValid = await crypto.subtle.verify(
       'HMAC',
       key,
@@ -135,7 +145,7 @@ export async function verifyJWT(token: string, secret: string): Promise<any> {
       throw new Error('Invalid signature');
     }
 
-    return JSON.parse(atob(encodedPayload));
+    return JSON.parse(base64urlDecode(encodedPayload));
   } catch (error) {
     throw new Error('Invalid token');
   }

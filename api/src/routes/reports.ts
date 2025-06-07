@@ -3,7 +3,7 @@ import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 import type { Env, Variables, AppContext } from '../types';
 import { authMiddleware } from '../middleware';
-import { generateId, isValidGSTIN } from '../utils';
+import { generateId, validateGSTIN } from '../utils';
 
 const reports = new Hono<{ Bindings: Env; Variables: Variables }>();
 
@@ -38,7 +38,7 @@ reports.post(
         return c.json({ error: 'Authentication required' }, 401);
       }
 
-      if (!isValidGSTIN(reportedBusinessGstin)) {
+      if (!validateGSTIN(reportedBusinessGstin)) {
         return c.json({ error: 'Invalid GSTIN format' }, 400);
       }
 
@@ -184,7 +184,7 @@ reports.get('/business/:gstin', async c => {
   try {
     const gstin = c.req.param('gstin');
 
-    if (!isValidGSTIN(gstin)) {
+    if (!validateGSTIN(gstin)) {
       return c.json({ error: 'Invalid GSTIN format' }, 400);
     }
 

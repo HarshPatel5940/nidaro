@@ -14,7 +14,6 @@ import {
   setSecureCookie,
   addExpiryTime,
   isExpired,
-  validatePhoneNumber,
   validateGSTIN,
   validatePAN,
   sanitizeInput,
@@ -36,7 +35,7 @@ auth.post(
 
       const sanitizedMobile = sanitizeInput(mobileNo);
 
-      if (!validatePhoneNumber(sanitizedMobile)) {
+      if (!isValidMobileNumber(sanitizedMobile)) {
         return c.json({ error: 'Invalid mobile number format' }, 400);
       }
 

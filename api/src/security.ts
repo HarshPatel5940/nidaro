@@ -69,14 +69,14 @@ export function sanitizeAndValidateInput(input: string, maxLength?: number): str
   return sanitized;
 }
 
-export function validateFileUpload(file: File): boolean {
+export function validateFileUpload(blob: Blob, fileType: string, fileSize: number): boolean {
   const { VALIDATION } = SECURITY_CONFIG;
 
-  if (!VALIDATION.ALLOWED_FILE_TYPES.includes(file.type)) {
+  if (!VALIDATION.ALLOWED_FILE_TYPES.includes(fileType)) {
     return false;
   }
 
-  if (file.size > VALIDATION.MAX_FILE_SIZE) {
+  if (fileSize > VALIDATION.MAX_FILE_SIZE) {
     return false;
   }
 
